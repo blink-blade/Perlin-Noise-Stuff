@@ -1,0 +1,48 @@
+#include <cstddef>
+#include <string>
+#include "stdint.h"
+#include "inttypes.h"
+#include "stdint.h"
+#include "glad.h" 
+#include "khrplatform.h"
+#include <GLFW/glfw3.h>
+#include "inttypes.h"
+#include <fstream>
+#include <iostream>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#ifndef HELPERS
+#define HELPERS
+
+using namespace std;
+// struct rectWTex {
+//     SDL_Rect SDLRect;
+//     SDL_Texture* texture;
+// };
+extern int scroll;
+// extern bool running;
+// extern const uint8_t* keys;
+// extern SDL_Window* window;
+// extern SDL_Renderer *renderer;
+// void handleControls();
+// rectWTex getRectFromPath(char *path, int x, int y, int w, int h);
+extern void processInput(GLFWwindow *window);
+extern void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+extern void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+extern const char* readFile(string path);
+extern glm::vec3 cameraPos;
+extern glm::vec3 cameraTarget;
+extern glm::vec3 cameraDirection;
+extern glm::vec3 up; 
+extern glm::vec3 cameraRight;
+extern glm::vec3 cameraUp;
+extern glm::vec3 cameraFront;
+extern glm::vec3 cameraUp;
+extern float fov;
+extern float cameraSpeed;
+extern float deltaTime;	// Time between current frame and last frame
+extern float lastFrame; // Time of last frame
+
+#endif
