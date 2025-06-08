@@ -1,6 +1,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <string>
+#include "stb_image.h"
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -33,6 +35,7 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 // -1 = down, 0 = none, 1 = up.
 int scroll = 0;
+GLFWwindow* window;
 int lastX, lastY;
 float xoffset, yaw, pitch;
 const char* readFile(string path) {
@@ -128,4 +131,40 @@ void processInput(GLFWwindow *window) {
     // }
     // cout << cameraAttrs[3] << "\n";
 
+}
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}  
+
+int glfwInits()
+{
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
+    {
+        cout << "Failed to create GLFW window" << endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+    glfwMakeContextCurrent(window);
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        cout << "Failed to initialize GLAD" << endl;
+        return -1;
+    } 
+
+    glEnable(GL_DEPTH_TEST);  
+    glViewport(0, 0, 800, 600);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback); 
+    glfwSetScrollCallback(window, scrollCallback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+    glfwSetCursorPosCallback(window, mouseCallback);  
+    stbi_set_flip_vertically_on_load(true);  
+    return 1;
 }

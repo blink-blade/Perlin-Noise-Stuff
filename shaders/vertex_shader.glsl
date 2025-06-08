@@ -1,8 +1,6 @@
 #version 460 core
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
 layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
-layout (location = 2) in vec2 aTexCoord;
-layout (location = 3) in mat4 instanceMatrix;
 
 out vec3 ourColor; // output a color to the fragment shader
 out vec2 TexCoord;
@@ -46,9 +44,8 @@ void main()
       //          0.0, 1.0, 0.0, yTrans,
         //        0.0, 0.0, 1.0, ZTrans,
           //      0.0, 0.0, 0.0, 1.0);
-    gl_Position = projection * view * instanceMatrix * (vec4(aPos.x, aPos.y, aPos.z, 1.0) * rotationMatrix(time, 0.0, time));
+    gl_Position = projection * view * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
-    //ourColor = aColor; // set ourColor to the input color we got from the vertex data
-    TexCoord = aTexCoord;
+    ourColor = aColor; // set ourColor to the input color we got from the vertex data
 }
