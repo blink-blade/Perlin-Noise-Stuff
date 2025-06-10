@@ -44,8 +44,8 @@ void main()
       //          0.0, 1.0, 0.0, yTrans,
         //        0.0, 0.0, 1.0, ZTrans,
           //      0.0, 0.0, 0.0, 1.0);
-    gl_Position = projection * view * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = projection * view * vec4(aPos.x, aPos.y + (sin(time + aPos.x)), aPos.z, 1.0);
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
-    ourColor = aColor; // set ourColor to the input color we got from the vertex data
+    ourColor = vec3(aColor.x + sin(time) / 4, aColor.y + sin(time + aPos.z) / 4, aColor.z + sin(time + aPos.x) / 4); // set ourColor to the input color we got from the vertex data
 }

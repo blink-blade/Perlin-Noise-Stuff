@@ -26,10 +26,10 @@ const char *fragmentShaderSource;
 
 // float vertices[] = {
 //     // positions          // colors           // texture coords
-//      0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-//      0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-//     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-//     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+//      0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  
+//      0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   
+//     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
+//     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
 int width = 500;
 int height = 500;
@@ -41,13 +41,100 @@ float vertices[9000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g,
 // };
 
 void makeFaces() {
-    int faceIndex;
-    float bottomLeft[2], bottomRight[2];
+    int faceIndex, currentIndex, firstTriangleIndex, secondTriangleIndex;
+    int bottomLeft[2], bottomRight[2], topLeft[2], topRight[2];
+    currentIndex = 0;
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
+            // There will be 6 * 6 times the amount of items in the vertices list than the amount of faces, because -
+            // each face is 6 vertices, each vertex has six attributes (x, y, z, r, g, b).
             faceIndex = x + width*y;
             // I believe we need to go in a counter-clockwise order of vertices.
-            bottomLeft = ;
+            bottomLeft[0] = x; bottomLeft[1] = y;
+            bottomRight[0] = x + 1; bottomRight[1] = y;
+            topLeft[0] = x; topLeft[1] = y + 1;
+            topRight[0] = x + 1; topRight[1] = y + 1;
+            
+            // XYZ of each vertex.
+            vertices[currentIndex] = bottomLeft[0];
+            currentIndex += 1;
+            vertices[currentIndex] = 0;
+            currentIndex += 1;
+            vertices[currentIndex] = bottomLeft[1];
+            currentIndex += 1;
+            vertices[currentIndex] = (float)x / width;
+            currentIndex += 1;
+            vertices[currentIndex] = (float)y / width;
+            currentIndex += 1;
+            vertices[currentIndex] = 1;
+            currentIndex += 1;
+
+            vertices[currentIndex] = topRight[0];
+            currentIndex += 1;
+            vertices[currentIndex] = 0;
+            currentIndex += 1;
+            vertices[currentIndex] = topRight[1];
+            currentIndex += 1;
+            vertices[currentIndex] = (float)x / width;
+            currentIndex += 1;
+            vertices[currentIndex] = (float)y / width;
+            currentIndex += 1;
+            vertices[currentIndex] = 1;
+            currentIndex += 1;
+
+            vertices[currentIndex] = topLeft[0];
+            currentIndex += 1;
+            vertices[currentIndex] = 0;
+            currentIndex += 1;
+            vertices[currentIndex] = topLeft[1];
+            currentIndex += 1;
+            vertices[currentIndex] = (float)x / width;
+            currentIndex += 1;
+            vertices[currentIndex] = (float)y / width;
+            currentIndex += 1;
+            vertices[currentIndex] = 1;
+            currentIndex += 1;
+
+
+
+            vertices[currentIndex] = bottomLeft[0];
+            currentIndex += 1;
+            vertices[currentIndex] = 0;
+            currentIndex += 1;
+            vertices[currentIndex] = bottomLeft[1];
+            currentIndex += 1;
+            vertices[currentIndex] = (float)x / width;
+            currentIndex += 1;
+            vertices[currentIndex] = (float)y / width;
+            currentIndex += 1;
+            vertices[currentIndex] = 1;
+            currentIndex += 1;
+
+            vertices[currentIndex] = bottomRight[0];
+            currentIndex += 1;
+            vertices[currentIndex] = 0;
+            currentIndex += 1;
+            vertices[currentIndex] = bottomRight[1];
+            currentIndex += 1;
+            vertices[currentIndex] = (float)x / width;
+            currentIndex += 1;
+            vertices[currentIndex] = (float)y / width;
+            currentIndex += 1;
+            vertices[currentIndex] = 1;
+            currentIndex += 1;
+
+            vertices[currentIndex] = topRight[0];
+            currentIndex += 1;
+            vertices[currentIndex] = 0;
+            currentIndex += 1;
+            vertices[currentIndex] = topRight[1];
+            currentIndex += 1;
+            vertices[currentIndex] = (float)x / width;
+            currentIndex += 1;
+            vertices[currentIndex] = (float)y / width;
+            currentIndex += 1;
+            vertices[currentIndex] = 1;
+            currentIndex += 1;
         }   
     }
 }
@@ -92,7 +179,7 @@ int main()
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;  
-        cameraSpeed = 50.5f * deltaTime;
+        cameraSpeed = 200.5f * deltaTime;
         processInput(window);
         scroll = 0;
         

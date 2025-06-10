@@ -30,7 +30,7 @@ glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 int firstMouse;
 float cameraSpeed = 0.0f;
-float fov = 45.0f;
+float fov = 90.0f;
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 // -1 = down, 0 = none, 1 = up.
