@@ -4,12 +4,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include "helpers.h"
+
+
+struct vec2d {
+    double x;
+    double y;
+};
 
 struct corner {
     double x;
     double y;
     struct vec2d gradientVec;
 };
+
 
 
 unsigned int seed = 100;
@@ -114,7 +122,6 @@ double noise(double x, double y) {
 
 double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, double frequency, double octaves, double distanceEffect, int islandMode, double distanceCutOffOffsetX, double distanceCutOffOffsetY, double offset, int landOnly, int distanceCutOff, unsigned int newSeed) {
     int x, y, i;
-    double **noiseMap;
     double cutOffCenterPointX = ((double)noiseWidth / 2) + distanceCutOffOffsetX;
     double cutOffCenterPointY = ((double)noiseHeight / 2) + distanceCutOffOffsetY;
     double octaveX = (octaves * ((double)noiseWidth / ((double)noiseWidth / 2)));
@@ -124,10 +131,10 @@ double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, doub
     double divide_amountX = 0;
     double divide_amountY = 0;
     if (distanceEffect) {
-        divide_amount = ((double)(width / distanceEffect) + (double)(height / distanceEffect));
+        divide_amount = ((double)(noiseWidth / distanceEffect) + (double)(noiseHeight / distanceEffect));
     }
     else {
-        divide_amount = ((double)(width) + (double)(height));
+        divide_amount = ((double)(noiseWidth) + (double)(noiseHeight));
     }
     
     double distance_to_center;
@@ -135,41 +142,22 @@ double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, doub
     *pSeed = newSeed;
 
     // Allocate memory for the array.
-    noiseMap = malloc(sizeof(double*)*height);
-    // Make rows in the array.
-    for(i=0; i<height + 1; i++) {
-        noiseMap[i] = malloc(sizeof(double) * width);
+    double** noiseMap = 0;
+    noiseMap = new double*[noiseHeight];
+
+    for (int h = 0; h < noiseHeight; h++)
+    {
+        noiseMap[h] = new double[noiseWidth];
     }
 
     
-    for (int x = 0; x < width; x++)
+    for (int x = 0; x < noiseWidth; x++)
     {
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < noiseHeight; y++)
         {
             // noiseMap[y][x] = -x + y + 10;
             // printf("%f\n", noiseMap[y][x]);
             // continue;
-            if (landOnly == 1) {
-                if (tiles[y][x].type == 1) {
-                    noiseMap[y][x] = -100;
-                    continue;
-                } 
-            }
-            if (distanceCutOff != 0) {
-                if (distanceCutOff > 0) {
-                    if (getDistanceBetweenPoints(x, y, cutOffCenterPointX, cutOffCenterPointY) >= distanceCutOff) {
-                        noiseMap[y][x] = -100;
-                        continue;
-                    } 
-                }
-                else if (distanceCutOff < 0){
-                    if (getDistanceBetweenPoints(x, y, cutOffCenterPointX, cutOffCenterPointY) <= -distanceCutOff) {
-                        noiseMap[y][x] = -100;
-                        continue;
-                    }       
-                }
-            }
-
             double amp = 1;
             val = 0;
             freq = frequency;
@@ -180,30 +168,28 @@ double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, doub
                 freq *= 2;
                 amp /= 2;
             }
-
-            if (distanceEffect != 0) {
+            
                 if (islandMode == 1) {
                     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                    distance_to_center = sqrt(pow((x - width / 2), 2) + pow((y - height / 2), 2));
+                    distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
                     val = fabs(val) - (distance_to_center / divide_amount);
                 }
                 else {
                     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                    distance_to_center = sqrt(pow((x - width / 2), 2) + pow((y - height / 2), 2));
+                    distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
                     val -= (distance_to_center / divide_amount);
                 }
-            }
             
             val += offset;
 
-            noiseMap[y][x] = val;
+            noiseMap[y][x] = val * 25;
         }
     }
     return noiseMap;
 }
 
 
-void generateMap(int layerAmount, double frequency, double octaves, unsigned int mapSeed) {
+extern void generateMap(int layerAmount, double frequency, double octaves, unsigned int mapSeed) {
     int x, y, sameTypeAdjacents, adjacentType;
     double val = 0;
     

@@ -40,12 +40,14 @@ uint hash( uint x ) {
 
 void main()
 {
-    //mat4 translation = mat4(1.0, 0.0, 0.0, xTrans,
-      //          0.0, 1.0, 0.0, yTrans,
-        //        0.0, 0.0, 1.0, ZTrans,
-          //      0.0, 0.0, 0.0, 1.0);
-    gl_Position = projection * view * vec4(aPos.x, aPos.y + (sin(time + aPos.x)), aPos.z, 1.0);
+    mat4 translation = mat4(1.0, 0.0, 0.0, -2500.0f,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, -2500.0f,
+                0.0, 0.0, 0.0, 1.0);
+    mat4 rotMatrix = rotationMatrix(0.0f, 0.0f, 0.0f);
+    //gl_Position = projection * view * (vec4(aPos.x + (sin(time + (aPos.z / 25)) * 25), aPos.y + (sin(time + (aPos.x / 25)) * 25), aPos.z, 1.0) * translation * rotMatrix);
+    gl_Position = projection * view * (vec4(aPos.x, aPos.y, aPos.z, 1.0) * translation * rotMatrix);
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
-    ourColor = vec3(aColor.x + sin(time) / 4, aColor.y + sin(time + aPos.z) / 4, aColor.z + sin(time + aPos.x) / 4); // set ourColor to the input color we got from the vertex data
+    ourColor = aColor; // set ourColor to the input color we got from the vertex data
 }

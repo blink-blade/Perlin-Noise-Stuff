@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <string>
 #include "stb_image.h"
-
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -38,6 +37,9 @@ int scroll = 0;
 GLFWwindow* window;
 int lastX, lastY;
 float xoffset, yaw, pitch;
+int width = 1000;
+int height = 1000;
+
 const char* readFile(string path) {
     ostringstream sstream;
     std::ifstream fs(path);
@@ -160,6 +162,8 @@ int glfwInits()
     } 
 
     glEnable(GL_DEPTH_TEST);  
+glEnable(GL_BLEND);
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback); 
     glfwSetScrollCallback(window, scrollCallback);

@@ -14,6 +14,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "generator.h"
 
 using namespace std;
 
@@ -31,116 +32,77 @@ const char *fragmentShaderSource;
 //     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
 //     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
-int width = 500;
-int height = 500;
-float vertices[9000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
+float vertices[36000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
 // float vertices[] = {
 //     -0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 1.0f
 // };
+double **noiseMap;
+
+int setVertex(int index, float x, float y, float z, float r, float b, float g) {
+    int newIndex = index;
+    vertices[newIndex] = x * 5;
+    newIndex += 1;
+    vertices[newIndex] = y * 5;
+    newIndex += 1;
+    vertices[newIndex] = z * 5;
+    newIndex += 1;
+    vertices[newIndex] = r;
+    newIndex += 1;
+    vertices[newIndex] = g;
+    newIndex += 1;
+    vertices[newIndex] = b;
+    return newIndex + 1;
+}
+
 
 void makeFaces() {
     int faceIndex, currentIndex, firstTriangleIndex, secondTriangleIndex;
     int bottomLeft[2], bottomRight[2], topLeft[2], topRight[2];
+    float r, g, b;
     currentIndex = 0;
+    noiseMap = generateNoiseMap(width + 1, height + 1, 5, 1.5, 24, 6, 1, 0, 0, 0, 0, 0, 123);
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
-            // There will be 6 * 6 times the amount of items in the vertices list than the amount of faces, because -
-            // each face is 6 vertices, each vertex has six attributes (x, y, z, r, g, b).
-            faceIndex = x + width*y;
             // I believe we need to go in a counter-clockwise order of vertices.
             bottomLeft[0] = x; bottomLeft[1] = y;
             bottomRight[0] = x + 1; bottomRight[1] = y;
             topLeft[0] = x; topLeft[1] = y + 1;
             topRight[0] = x + 1; topRight[1] = y + 1;
-            
-            // XYZ of each vertex.
-            vertices[currentIndex] = bottomLeft[0];
-            currentIndex += 1;
-            vertices[currentIndex] = 0;
-            currentIndex += 1;
-            vertices[currentIndex] = bottomLeft[1];
-            currentIndex += 1;
-            vertices[currentIndex] = (float)x / width;
-            currentIndex += 1;
-            vertices[currentIndex] = (float)y / width;
-            currentIndex += 1;
-            vertices[currentIndex] = 1;
-            currentIndex += 1;
+            if (noiseMap[y][x] < -0.9) {
+                r = 39.0 / 255;
+                b = 88.0 / 255;
+                g = 123.0 / 255;
+            }
+            else if (noiseMap[y][x] < -0.2) {
+                r = 177.0 / 255;
+                b = 145.0 / 255;
+                g = 88.0 / 255;
+            }
+            else {
+                r = 93.0 / 255;
+                b = 92.0 / 255;
+                g = 45.0 / 255;
+            }
+            r -= noiseMap[y][x] / 50;
+            b -= noiseMap[y][x] / 50;
+            g -= noiseMap[y][x] / 50;
 
-            vertices[currentIndex] = topRight[0];
-            currentIndex += 1;
-            vertices[currentIndex] = 0;
-            currentIndex += 1;
-            vertices[currentIndex] = topRight[1];
-            currentIndex += 1;
-            vertices[currentIndex] = (float)x / width;
-            currentIndex += 1;
-            vertices[currentIndex] = (float)y / width;
-            currentIndex += 1;
-            vertices[currentIndex] = 1;
-            currentIndex += 1;
-
-            vertices[currentIndex] = topLeft[0];
-            currentIndex += 1;
-            vertices[currentIndex] = 0;
-            currentIndex += 1;
-            vertices[currentIndex] = topLeft[1];
-            currentIndex += 1;
-            vertices[currentIndex] = (float)x / width;
-            currentIndex += 1;
-            vertices[currentIndex] = (float)y / width;
-            currentIndex += 1;
-            vertices[currentIndex] = 1;
-            currentIndex += 1;
-
-
-
-            vertices[currentIndex] = bottomLeft[0];
-            currentIndex += 1;
-            vertices[currentIndex] = 0;
-            currentIndex += 1;
-            vertices[currentIndex] = bottomLeft[1];
-            currentIndex += 1;
-            vertices[currentIndex] = (float)x / width;
-            currentIndex += 1;
-            vertices[currentIndex] = (float)y / width;
-            currentIndex += 1;
-            vertices[currentIndex] = 1;
-            currentIndex += 1;
-
-            vertices[currentIndex] = bottomRight[0];
-            currentIndex += 1;
-            vertices[currentIndex] = 0;
-            currentIndex += 1;
-            vertices[currentIndex] = bottomRight[1];
-            currentIndex += 1;
-            vertices[currentIndex] = (float)x / width;
-            currentIndex += 1;
-            vertices[currentIndex] = (float)y / width;
-            currentIndex += 1;
-            vertices[currentIndex] = 1;
-            currentIndex += 1;
-
-            vertices[currentIndex] = topRight[0];
-            currentIndex += 1;
-            vertices[currentIndex] = 0;
-            currentIndex += 1;
-            vertices[currentIndex] = topRight[1];
-            currentIndex += 1;
-            vertices[currentIndex] = (float)x / width;
-            currentIndex += 1;
-            vertices[currentIndex] = (float)y / width;
-            currentIndex += 1;
-            vertices[currentIndex] = 1;
-            currentIndex += 1;
+            currentIndex = setVertex(currentIndex, bottomLeft[0], noiseMap[bottomLeft[1]][bottomLeft[0]], bottomLeft[1], r, g, b);
+            currentIndex = setVertex(currentIndex, topRight[0], noiseMap[topRight[1]][topRight[0]], topRight[1], r, g, b);
+            currentIndex = setVertex(currentIndex, topLeft[0], noiseMap[topLeft[1]][topLeft[0]], topLeft[1], r, g, b);
+            currentIndex = setVertex(currentIndex, bottomLeft[0], noiseMap[bottomLeft[1]][bottomLeft[0]], bottomLeft[1], r, g, b);
+            currentIndex = setVertex(currentIndex, topRight[0], noiseMap[topRight[1]][topRight[0]], topRight[1], r, g, b);
+            currentIndex = setVertex(currentIndex, bottomRight[0], noiseMap[bottomRight[1]][bottomRight[0]], bottomRight[1], r, g, b);
         }   
     }
+    // cout << "Time was: " << glfwGetTime() - timeValue << "\n";
 }
 
 int main()
 {
+    float timeTakenToStart = glfwGetTime();
     glfwInits();
     Shader cubeShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
     makeFaces();
@@ -174,7 +136,7 @@ int main()
 
 
 
-
+    cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;

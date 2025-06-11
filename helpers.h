@@ -12,8 +12,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_IMAGE_IMPLEMENTATION
 
 #ifndef HELPERS
 #define HELPERS
@@ -34,6 +34,8 @@ extern void processInput(GLFWwindow *window);
 extern void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 extern void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 extern int glfwInits();
+extern int width;
+extern int height;
 extern const char* readFile(string path);
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraTarget;
