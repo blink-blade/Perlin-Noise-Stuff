@@ -19,7 +19,7 @@
 using namespace std;
 
 // lighting
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(500, 25.0, 0);
 
 unsigned int vertexShader;
 unsigned int fragmentShader;
@@ -129,14 +129,14 @@ void makeFaces() {
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
-    noiseMap = generateNoiseMap(width + 1, width + 1, 5, 2, 6, 1, 0, 0, 0, 0, 0, 123);
+    noiseMap = generateNoiseMap(width + 1, width + 1, 4, 0.2, 6, 1, 0, 0, 0, 0, 0, 123);
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
-            bottomLeft = glm::vec3(x, noiseMap[y][x] * 0, y);
-            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 0, y);
-            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 0, y + 1);
-            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 0, y + 1);
+            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
+            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
+            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
+            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
             r = 0.1, g = 0.1, b = 0.1;
             if (noiseMap[y][x] < -0.7) {
                 r = 39.0 / 255;
@@ -289,8 +289,7 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 54000000); 
 
         // world transformation
-        
-        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+        lightPos[2] += sin(timeValue) * 10;
         // also draw the lamp object
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
