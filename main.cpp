@@ -32,7 +32,7 @@ const char *fragmentShaderSource;
 //     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
 //     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
-float vertices[36000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
+float vertices[48000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
 // float vertices[] = {
 //     -0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
@@ -40,19 +40,23 @@ float vertices[36000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g
 // };
 double **noiseMap;
 
-int setVertex(int index, float x, float y, float z, float r, float b, float g) {
+int setVertex(int index, float x, float y, float z, float r, float b, float g, float tX, float tY) {
     int newIndex = index;
-    vertices[newIndex] = x * 5;
+    vertices[newIndex] = x;
     newIndex += 1;
-    vertices[newIndex] = y * 5;
+    vertices[newIndex] = y;
     newIndex += 1;
-    vertices[newIndex] = z * 5;
+    vertices[newIndex] = z;
     newIndex += 1;
     vertices[newIndex] = r;
     newIndex += 1;
     vertices[newIndex] = g;
     newIndex += 1;
     vertices[newIndex] = b;
+    newIndex += 1;
+    vertices[newIndex] = tX;
+    newIndex += 1;
+    vertices[newIndex] = tY;
     return newIndex + 1;
 }
 
@@ -60,9 +64,12 @@ int setVertex(int index, float x, float y, float z, float r, float b, float g) {
 void makeFaces() {
     int faceIndex, currentIndex, firstTriangleIndex, secondTriangleIndex;
     int bottomLeft[2], bottomRight[2], topLeft[2], topRight[2];
-    float r, g, b;
+    float r = 1, g = 1, b = 1;
     currentIndex = 0;
-    noiseMap = generateNoiseMap(width + 1, height + 1, 5, 1.5, 24, 6, 1, 0, 0, 0, 0, 0, 123);
+    // 0.545474
+    // 0.0541736
+    float timeTakenToStart = glfwGetTime();
+    noiseMap = generateNoiseMap(width + 1, width + 1, 5, 0.1, 6, 1, 0, 0, 0, 0, 0, 123);
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
@@ -70,12 +77,13 @@ void makeFaces() {
             bottomRight[0] = x + 1; bottomRight[1] = y;
             topLeft[0] = x; topLeft[1] = y + 1;
             topRight[0] = x + 1; topRight[1] = y + 1;
-            if (noiseMap[y][x] < -0.9) {
+            r = 0.1, g = 0.1, b = 0.1;
+            if (noiseMap[y][x] < -0.7) {
                 r = 39.0 / 255;
                 b = 88.0 / 255;
                 g = 123.0 / 255;
             }
-            else if (noiseMap[y][x] < -0.2) {
+            else if (noiseMap[y][x] < -0.3) {
                 r = 177.0 / 255;
                 b = 145.0 / 255;
                 g = 88.0 / 255;
@@ -85,24 +93,22 @@ void makeFaces() {
                 b = 92.0 / 255;
                 g = 45.0 / 255;
             }
-            r -= noiseMap[y][x] / 50;
-            b -= noiseMap[y][x] / 50;
-            g -= noiseMap[y][x] / 50;
-
-            currentIndex = setVertex(currentIndex, bottomLeft[0], noiseMap[bottomLeft[1]][bottomLeft[0]], bottomLeft[1], r, g, b);
-            currentIndex = setVertex(currentIndex, topRight[0], noiseMap[topRight[1]][topRight[0]], topRight[1], r, g, b);
-            currentIndex = setVertex(currentIndex, topLeft[0], noiseMap[topLeft[1]][topLeft[0]], topLeft[1], r, g, b);
-            currentIndex = setVertex(currentIndex, bottomLeft[0], noiseMap[bottomLeft[1]][bottomLeft[0]], bottomLeft[1], r, g, b);
-            currentIndex = setVertex(currentIndex, topRight[0], noiseMap[topRight[1]][topRight[0]], topRight[1], r, g, b);
-            currentIndex = setVertex(currentIndex, bottomRight[0], noiseMap[bottomRight[1]][bottomRight[0]], bottomRight[1], r, g, b);
+            r -= noiseMap[y][x];
+            b -= noiseMap[y][x];
+            g -= noiseMap[y][x];
+            currentIndex = setVertex(currentIndex, bottomLeft[0], noiseMap[bottomLeft[1]][bottomLeft[0]] * 45, bottomLeft[1], r, g, b, 0.0, 0.0);
+            currentIndex = setVertex(currentIndex, topRight[0], noiseMap[topRight[1]][topRight[0]] * 45, topRight[1], r, g, b, 1.0, 1.0);
+            currentIndex = setVertex(currentIndex, topLeft[0], noiseMap[topLeft[1]][topLeft[0]] * 45, topLeft[1], r, g, b, 0.0, 1.0);
+            currentIndex = setVertex(currentIndex, bottomLeft[0], noiseMap[bottomLeft[1]][bottomLeft[0]] * 45, bottomLeft[1], r, g, b, 0.0, 0.0);
+            currentIndex = setVertex(currentIndex, topRight[0], noiseMap[topRight[1]][topRight[0]] * 45, topRight[1], r, g, b, 1.0, 1.0);
+            currentIndex = setVertex(currentIndex, bottomRight[0], noiseMap[bottomRight[1]][bottomRight[0]] * 45, bottomRight[1], r, g, b, 1.0, 0.0);
         }   
     }
-    // cout << "Time was: " << glfwGetTime() - timeValue << "\n";
+    cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
 }
 
 int main()
 {
-    float timeTakenToStart = glfwGetTime();
     glfwInits();
     Shader cubeShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
     makeFaces();
@@ -119,13 +125,40 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+        unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // load and generate the texture
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("images/john.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+
+    glUniform1i(glGetUniformLocation(cubeShader.ID, "texture1"), 0);
+
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
@@ -134,14 +167,13 @@ int main()
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     cout << "Maximum nr of vertex attributes supported: " << nrAttributes << endl;
 
+// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-
-    cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;  
-        cameraSpeed = 200.5f * deltaTime;
+        cameraSpeed = 100.5f * deltaTime;
         processInput(window);
         scroll = 0;
         
@@ -183,7 +215,7 @@ int main()
 
         // draw the object
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 9000000); 
+        glDrawArrays(GL_TRIANGLES, 0, 48000000); 
         glfwSwapBuffers(window);
         glfwPollEvents();    
     }

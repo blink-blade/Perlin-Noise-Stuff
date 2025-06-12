@@ -1,6 +1,7 @@
 #version 460 core
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
 layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
+layout (location = 2) in vec2 aTexCoord;
 
 out vec3 ourColor; // output a color to the fragment shader
 out vec2 TexCoord;
@@ -40,14 +41,16 @@ uint hash( uint x ) {
 
 void main()
 {
-    mat4 translation = mat4(1.0, 0.0, 0.0, -2500.0f,
+    mat4 translation = mat4(1.0, 0.0, 0.0, -1000.0f,
                 0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, -2500.0f,
+                0.0, 0.0, 1.0, -1000.0f,
                 0.0, 0.0, 0.0, 1.0);
     mat4 rotMatrix = rotationMatrix(0.0f, 0.0f, 0.0f);
-    //gl_Position = projection * view * (vec4(aPos.x + (sin(time + (aPos.z / 25)) * 25), aPos.y + (sin(time + (aPos.x / 25)) * 25), aPos.z, 1.0) * translation * rotMatrix);
-    gl_Position = projection * view * (vec4(aPos.x, aPos.y, aPos.z, 1.0) * translation * rotMatrix);
+    gl_Position = projection * view * (vec4(aPos.x, aPos.y + sin(cos(tan(atan(aPos.x, aPos.y) * 180 / 3.14))) * 10, aPos.z, 1.0) * translation * rotMatrix);
+    //gl_Position = projection * view * (vec4(aPos.x, aPos.y, aPos.z, 1.0));
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
-    ourColor = aColor; // set ourColor to the input color we got from the vertex data
+    ourColor = aColor;
+    TexCoord = aTexCoord;
+    //ourColor = aColor; // set ourColor to the input color we got from the vertex data
 }

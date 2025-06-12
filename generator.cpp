@@ -22,6 +22,7 @@ struct corner {
 
 unsigned int seed = 100;
 double **mapNoiseMap;
+struct corner **cornerGrid;
 
 struct vec2d possibleGradientVectors[8];
 
@@ -43,27 +44,6 @@ struct vec2d randomGradient(int ix, int iy) {
     v.y = cos(a);
     return v;
 }
-
-
-double nearestTenth(float val) {
-    int len = log10(val);
-    float div = pow(10, len);
-    return ceil(val / div) * div;
-}
-
-// Computes the dot product of the distance and gradient vectors.
-double dotGridGradient(int ix, int iy, double x, double y) {
-    
-    // Get gradient from integer coordinates
-    struct vec2d gradient = randomGradient(ix, iy);
- 
-    // Compute the distance vector
-    double dx = x - (double)ix;
-    double dy = y - (double)iy;
- 
-    // Compute the dot-product
-    return (dx * gradient.x + dy * gradient.y);
-}
  
 double interpolate(double a0, double a1, double w) {
     return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
@@ -81,19 +61,11 @@ double noise(double x, double y) {
     // Compute Interpolation weights
     double sx = x - (double)x0;
     double sy = y - (double)y0;
-
-    struct corner tlCorner;
-    struct corner blCorner;
-    struct corner trCorner;
-    struct corner brCorner;
-    tlCorner.x = x0, tlCorner.y = y0;
-    blCorner.x = x0, blCorner.y = y1;
-    trCorner.x = x1, trCorner.y = y0;
-    brCorner.x = x1, brCorner.y = y1;
-    tlCorner.gradientVec = randomGradient(tlCorner.x, tlCorner.y);
-    blCorner.gradientVec = randomGradient(blCorner.x, blCorner.y);
-    trCorner.gradientVec = randomGradient(trCorner.x, trCorner.y);
-    brCorner.gradientVec = randomGradient(brCorner.x, brCorner.y);
+    // cout << sx << ", " << sy << "\n";
+    struct corner tlCorner = cornerGrid[y0][x0];
+    struct corner blCorner = cornerGrid[y1][x0];
+    struct corner trCorner = cornerGrid[y0][x1];
+    struct corner brCorner = cornerGrid[y1][x1];
 
     // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
     struct vec2d tlDistanceVector;
@@ -114,18 +86,47 @@ double noise(double x, double y) {
     // Interpolation.
     double tlTrInterpolation = interpolate(tlDotProduct, trDotProduct, sx);
     double blBrInterpolation = interpolate(blDotProduct, brDotProduct, sx);
-
     
     return interpolate(tlTrInterpolation, blBrInterpolation, sy);
 }
 
+int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, double frequency) {
+    // The max x or y value that a corner could be positioned at.
+    double freq = frequency;
+    int maxW = noiseWidth - 1;
+    int maxPos;
+    for (int ii = 0; ii < layerAmount; ii++) {
+        maxPos = (int)((double)maxW * freq);
+        freq *= 2;
+    }
+    return maxPos + 2;
+}
 
-double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, double frequency, double octaves, double distanceEffect, int islandMode, double distanceCutOffOffsetX, double distanceCutOffOffsetY, double offset, int landOnly, int distanceCutOff, unsigned int newSeed) {
+void makeCorners(int noiseWidth, int noiseHeight, int layerAmount, double frequency) {
+    int max = getMaxCornerPos(noiseWidth, noiseHeight, layerAmount, frequency);
+    struct corner corner;
+
+    // Allocate memory for the array.
+    cornerGrid = new struct corner*[max];
+
+    for (int h = 0; h < max; h++) {
+        cornerGrid[h] = new struct corner[max];
+    }
+
+    for (int x = 0; x < max; x++) {
+        for (int y = 0; y < max; y++) {
+            corner.x = x;
+            corner.y = y;
+            corner.gradientVec = randomGradient(x, y);
+            cornerGrid[y][x] = corner;
+        }
+    }
+}
+
+double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, double frequency, double distanceEffect, int islandMode, double distanceCutOffOffsetX, double distanceCutOffOffsetY, double offset, int landOnly, int distanceCutOff, unsigned int newSeed) {
     int x, y, i;
     double cutOffCenterPointX = ((double)noiseWidth / 2) + distanceCutOffOffsetX;
     double cutOffCenterPointY = ((double)noiseHeight / 2) + distanceCutOffOffsetY;
-    double octaveX = (octaves * ((double)noiseWidth / ((double)noiseWidth / 2)));
-    double octaveY = (octaves * ((double)noiseHeight / ((double)noiseHeight / 2)));
     double val = 0, freq;
     double divide_amount = 0;
     double divide_amountX = 0;
@@ -150,7 +151,10 @@ double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, doub
         noiseMap[h] = new double[noiseWidth];
     }
 
+    frequency /= 50;
     
+    makeCorners(noiseWidth, noiseHeight, layerAmount, frequency);
+
     for (int x = 0; x < noiseWidth; x++)
     {
         for (int y = 0; y < noiseHeight; y++)
@@ -161,39 +165,38 @@ double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, doub
             double amp = 1;
             val = 0;
             freq = frequency;
-            for (int i = 0; i < layerAmount; i++)
-            {
-                val += noise((double)x * freq / octaveX, (double)y * freq / octaveY) * amp;
+            for (int i = 0; i < layerAmount; i++) {
+                val += noise((double)x * freq, (double)y * freq) * amp;
 
                 freq *= 2;
                 amp /= 2;
             }
             
-                if (islandMode == 1) {
-                    // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                    distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
-                    val = fabs(val) - (distance_to_center / divide_amount);
-                }
-                else {
-                    // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                    distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
-                    val -= (distance_to_center / divide_amount);
-                }
+            if (islandMode == 1) {
+                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+                distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
+                val = fabs(val) - (distance_to_center / divide_amount);
+            }
+            else {
+                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+                distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
+                val -= (distance_to_center / divide_amount);
+            }
             
             val += offset;
 
-            noiseMap[y][x] = val * 25;
+            noiseMap[y][x] = val;
         }
     }
     return noiseMap;
 }
 
 
-extern void generateMap(int layerAmount, double frequency, double octaves, unsigned int mapSeed) {
+extern void generateMap(int layerAmount, double frequency, unsigned int mapSeed) {
     int x, y, sameTypeAdjacents, adjacentType;
     double val = 0;
     
-    mapNoiseMap = generateNoiseMap(width, height, layerAmount, frequency, octaves, 6, 1, 0, 0, 0, 0, 0, mapSeed);
+    mapNoiseMap = generateNoiseMap(width, height, layerAmount, frequency, 6, 1, 0, 0, 0, 0, 0, mapSeed);
 
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
