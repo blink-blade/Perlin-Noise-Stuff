@@ -4,11 +4,13 @@
 #define SHADER_H
 
 #include "glad.h" 
-
+#include "glm/detail/type_mat.hpp"
+#include "glm/glm.hpp"
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "glm/gtc/type_ptr.hpp"
 
 using namespace std;
 
@@ -92,6 +94,16 @@ public:
     void setFloat(const string &name, float value) const
     { 
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
+    }
+    // ------------------------------------------------------------------------
+    void setVec3(const string &name, float x, float y, float z) const
+    { 
+        glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(glm::vec3(x, y, z))); 
+    }
+    // ------------------------------------------------------------------------
+    void setMat4(const string &name, glm::mat4 matrix) const
+    { 
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); 
     }
     // ------------------------------------------------------------------------
 private:
