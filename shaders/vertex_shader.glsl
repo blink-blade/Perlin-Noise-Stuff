@@ -50,7 +50,7 @@ void main()
     //gl_Position = projection * view * (vec4(aPos.x, aPos.y, aPos.z, 1.0));
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
-    ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z);
+    ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     TexCoord = aTexCoord;
     //ourColor = aColor; // set ourColor to the input color we got from the vertex data
 }
