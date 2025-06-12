@@ -133,10 +133,10 @@ void makeFaces() {
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
-            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
-            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
-            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
-            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
+            bottomLeft = glm::vec3(x, noiseMap[y][x] * 0, y);
+            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 0, y);
+            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 0, y + 1);
+            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 0, y + 1);
             r = 0.1, g = 0.1, b = 0.1;
             if (noiseMap[y][x] < -0.7) {
                 r = 39.0 / 255;
@@ -266,6 +266,7 @@ int main()
         lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
         lightingShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
         lightingShader.setVec3("lightPos", lightPos[0], lightPos[1], lightPos[2]); 
+        lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
 
         glm::mat4 view;
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);

@@ -57,5 +57,6 @@ void main()
     //TexCoord = aTexCoord;
     ourColor = aColor; // set ourColor to the input color we got from the vertex data
     gl_Position = projection * view * vec4(FragPos, 1.0);
+    // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
     Normal = aNormal;
 }
