@@ -157,6 +157,7 @@ void makeFaces() {
             currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2]);
             currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2]);
             currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2]);
+            normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
             currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2]);
             currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2]);
             currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2]);
@@ -299,7 +300,7 @@ int main()
         lightCubeShader.setMat4("model", model);
 
         glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 216);
+        glDrawArrays(GL_TRIANGLES, 0, 72);
         glfwSwapBuffers(window);
         glfwPollEvents();    
     }
