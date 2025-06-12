@@ -46,11 +46,11 @@ void main()
                 0.0, 0.0, 1.0, -1000.0f,
                 0.0, 0.0, 0.0, 1.0);
     mat4 rotMatrix = rotationMatrix(0.0f, 0.0f, 0.0f);
-    gl_Position = projection * view * (vec4(aPos.x, aPos.y + sin(cos(tan(atan(aPos.x, aPos.y) * 180 / 3.14))) * 10, aPos.z, 1.0) * translation * rotMatrix);
+    gl_Position = projection * view * (vec4(aPos.x + (sin(time + (aPos.z / 25)) * 25), aPos.y + (cos(time + (aPos.y / 25)) * 25), aPos.z + (cos(time + (aPos.x / 25)) * 25), 1.0) * translation * rotMatrix);
     //gl_Position = projection * view * (vec4(aPos.x, aPos.y, aPos.z, 1.0));
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
-    ourColor = aColor;
+    ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z);
     TexCoord = aTexCoord;
     //ourColor = aColor; // set ourColor to the input color we got from the vertex data
 }

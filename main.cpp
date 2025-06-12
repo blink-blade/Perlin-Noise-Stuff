@@ -69,7 +69,7 @@ void makeFaces() {
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
-    noiseMap = generateNoiseMap(width + 1, width + 1, 5, 0.1, 6, 1, 0, 0, 0, 0, 0, 123);
+    noiseMap = generateNoiseMap(width + 1, width + 1, 5, 2, 6, 1, 0, 0, 0, 0, 0, 123);
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
