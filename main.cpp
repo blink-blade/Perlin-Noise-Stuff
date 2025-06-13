@@ -291,7 +291,7 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 54000000); 
 
         // world transformation
-        // lightPos[2] += sin(timeValue) * 10;
+        lightPos[2] += sin(timeValue) * 10;
         // also draw the lamp object
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
