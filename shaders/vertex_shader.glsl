@@ -54,7 +54,7 @@ vec2 randomGradient(float ix, float iy) {
 }
 
 // Sample Perlin noise at coordinates x, y
-float noise(float x, float y) {
+float noise(float x, float y, float xOffset, float yOffset) {
     x /= 100; y /= 100;
     // Get the corner positions, x0 is left, x1 is left
     int x0 = int(x); 
@@ -67,13 +67,13 @@ float noise(float x, float y) {
     float sy = y - y0;
 
     corner tlCorner;
-    tlCorner.x = x0; tlCorner.y = y0; tlCorner.gradientVec = randomGradient(x0, y0);
+    tlCorner.x = x0; tlCorner.y = y0; tlCorner.gradientVec = randomGradient(x0 + xOffset, y0 + yOffset);
     corner blCorner;
-    blCorner.x = x0; blCorner.y = y1; blCorner.gradientVec = randomGradient(x0, y1);
+    blCorner.x = x0; blCorner.y = y1; blCorner.gradientVec = randomGradient(x0 + xOffset, y1 + yOffset);
     corner trCorner;
-    trCorner.x = x1; trCorner.y = y0; trCorner.gradientVec = randomGradient(x1, y0);
+    trCorner.x = x1; trCorner.y = y0; trCorner.gradientVec = randomGradient(x1 + xOffset, y0 + yOffset);
     corner brCorner;
-    brCorner.x = x1; brCorner.y = y1; brCorner.gradientVec = randomGradient(x1, y1);
+    brCorner.x = x1; brCorner.y = y1; brCorner.gradientVec = randomGradient(x1 + xOffset, y1 + yOffset);
 
     // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
     vec2 tlDistanceVector;
@@ -98,7 +98,7 @@ float noise(float x, float y) {
     return interpolate(tlTrInterpolation, blBrInterpolation, sy);
 }
 
-float layeredNoise(float x, float y, int layerAmount, float frequency) {
+float layeredNoise(float x, float y, int layerAmount, float frequency, float gradientXOffset, float gradientYOffset) {
     // noiseMap[y][x] = -x + y + 10;
     // printf("%f\n", noiseMap[y][x]);
     // continue;
@@ -107,7 +107,7 @@ float layeredNoise(float x, float y, int layerAmount, float frequency) {
     float freq = frequency;
 
     for (int i = 0; i < layerAmount; i++) {
-        val += noise(x * freq, y * freq) * amp;
+        val += noise(x * freq, y * freq, gradientXOffset, gradientYOffset) * amp;
 
         freq *= 2;
         amp /= 2;
@@ -136,7 +136,7 @@ void main()
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     //TexCoord = aTexCoord;
-    float noiseVal = layeredNoise(aPos.x + time * 100, aPos.z + time * 100, 4, 2);
+    float noiseVal = layeredNoise(aPos.x + time * 100, aPos.z + time * 100, 4, 2, sin(time), tan(time));
     if (noiseVal < -0.4) {
         ourColor = vec3(39.0 / 255, 88.0 / 255, 123.0 / 255);
     }
