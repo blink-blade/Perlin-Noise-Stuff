@@ -154,7 +154,7 @@ void main()
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     //TexCoord = aTexCoord;
-    float noiseVal = layeredNoise(aPos.x + time * 25, aPos.z + time * 25, 4, 2, sin(time), cos(time));
+    float noiseVal = layeredNoise(aPos.x, aPos.z , 4, 0.01 + sin(time) * 1.5 + 1.5, sin(time), cos(time));
     if (noiseVal < -0.4) {
         ourColor = vec3(39.0 / 255, 88.0 / 255, 123.0 / 255);
     }
