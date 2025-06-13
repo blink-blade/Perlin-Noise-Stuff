@@ -122,8 +122,6 @@ float layeredNoise(float x, float y, int layerAmount, float frequency) {
    return val;
 }
 
-
-
 void main()
 {
     FragPos = vec3(vec4(aPos, 1.0));
@@ -138,21 +136,23 @@ void main()
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     //TexCoord = aTexCoord;
-    float noiseVal = layeredNoise(aPos.x, aPos.z, 4, 2);
-    if (noiseVal < 0) {
-        ourColor = vec3(noiseVal, noiseVal + 0.5, noiseVal);
+    float noiseVal = layeredNoise(aPos.x + time * 100, aPos.z + time * 100, 4, 2);
+    if (noiseVal < -0.4) {
+        ourColor = vec3(39.0 / 255, 88.0 / 255, 123.0 / 255);
+    }
+    else if (noiseVal < -0.3) {
+        ourColor = vec3(177.0 / 255, 145.0 / 255, 88.0 / 255);
     }
     else {
-        ourColor = vec3(noiseVal + 0.5, noiseVal, noiseVal);;
+        ourColor = vec3(93.0 / 255, 92.0 / 255, 45.0 / 255);
     }
-     // set ourColor to the input color we got from the vertex data
-    gl_Position = projection * view * vec4(FragPos.x, FragPos.y + noiseVal * 25, FragPos.z, 1.0);
+    ourColor.x -= noiseVal / 2;
+    ourColor.y -= noiseVal / 2;
+    ourColor.z -= noiseVal / 2;
 
-    translation = mat4(1.0, 0.0, 0.0, FragPos.x,
-                0.0, 1.0, 0.0, FragPos.y + noiseVal * 25,
-                0.0, 0.0, 1.0, FragPos.z,
-                0.0, 0.0, 0.0, 1.0);
 
+
+gl_Position = projection * view * vec4(FragPos.x, FragPos.y + noiseVal * 25, FragPos.z, 1.0);
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
-    Normal = mat3(transpose(inverse(projection * view * translation))) * aNormal;  
+    Normal = aNormal;
 }
