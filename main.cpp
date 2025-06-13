@@ -134,27 +134,26 @@ void makeFaces() {
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
-            // noiseMap[y][x] * 45
-            bottomLeft = glm::vec3(x, 0, y);
-            bottomRight = glm::vec3(x + 1, 0, y);
-            topLeft = glm::vec3(x, 0, y + 1);
-            topRight = glm::vec3(x + 1, 0, y + 1);
-            // r = 0.1, g = 0.1, b = 0.1;
-            // if (noiseMap[y][x] < -0.7) {
-            //     r = 39.0 / 255;
-            //     b = 88.0 / 255;
-            //     g = 123.0 / 255;
-            // }
-            // else if (noiseMap[y][x] < -0.3) {
-            //     r = 177.0 / 255;
-            //     b = 145.0 / 255;
-            //     g = 88.0 / 255;
-            // }
-            // else {
-            //     r = 93.0 / 255;
-            //     b = 92.0 / 255;
-            //     g = 45.0 / 255;
-            // }
+            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
+            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
+            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
+            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
+            r = 0.1, g = 0.1, b = 0.1;
+            if (noiseMap[y][x] < -0.7) {
+                r = 39.0 / 255;
+                b = 88.0 / 255;
+                g = 123.0 / 255;
+            }
+            else if (noiseMap[y][x] < -0.3) {
+                r = 177.0 / 255;
+                b = 145.0 / 255;
+                g = 88.0 / 255;
+            }
+            else {
+                r = 93.0 / 255;
+                b = 92.0 / 255;
+                g = 45.0 / 255;
+            }
             normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
             currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2]);
             currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2]);
@@ -291,7 +290,7 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 486000000 / 6); 
 
         // world transformation
-        lightPos[2] += sin(timeValue) * 10;
+        lightPos[2] += sin(timeValue);
         // also draw the lamp object
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);

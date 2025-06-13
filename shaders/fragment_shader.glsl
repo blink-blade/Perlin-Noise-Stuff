@@ -14,13 +14,13 @@ uniform vec3 lightPos;
 uniform vec3 viewPos;
 
 void main() {
-    float ambientStrength = 0.75;
+    float ambientStrength = 0.1;
     vec3 ambient = ambientStrength * lightColor;
   	
     // diffuse 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
+    float diff = max(dot(norm, lightDir), 0.0) / (distance(lightPos, FragPos) / 100);
     vec3 diffuse = diff * lightColor;
             
     float specularStrength = 0.5;
