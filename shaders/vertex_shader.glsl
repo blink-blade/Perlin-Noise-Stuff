@@ -67,13 +67,31 @@ float noise(float x, float y, float xOffset, float yOffset) {
     float sy = y - y0;
 
     corner tlCorner;
-    tlCorner.x = x0; tlCorner.y = y0; tlCorner.gradientVec = randomGradient(x0 + xOffset, y0 + yOffset);
+    tlCorner.x = x0; tlCorner.y = y0; tlCorner.gradientVec = randomGradient(x0, y0);
     corner blCorner;
-    blCorner.x = x0; blCorner.y = y1; blCorner.gradientVec = randomGradient(x0 + xOffset, y1 + yOffset);
+    blCorner.x = x0; blCorner.y = y1; blCorner.gradientVec = randomGradient(x0, y1);
     corner trCorner;
-    trCorner.x = x1; trCorner.y = y0; trCorner.gradientVec = randomGradient(x1 + xOffset, y0 + yOffset);
+    trCorner.x = x1; trCorner.y = y0; trCorner.gradientVec = randomGradient(x1, y0);
     corner brCorner;
-    brCorner.x = x1; brCorner.y = y1; brCorner.gradientVec = randomGradient(x1 + xOffset, y1 + yOffset);
+    brCorner.x = x1; brCorner.y = y1; brCorner.gradientVec = randomGradient(x1, y1);
+    xOffset += 0.5;
+    yOffset += 0.5;
+    tlCorner.x += xOffset;
+    tlCorner.y += yOffset;
+    tlCorner.gradientVec.x += xOffset;
+    tlCorner.gradientVec.y += yOffset;
+    blCorner.x += xOffset;
+    blCorner.y += yOffset;
+    blCorner.gradientVec.x += xOffset;
+    blCorner.gradientVec.y += yOffset;
+    trCorner.x += xOffset;
+    trCorner.y += yOffset;
+    trCorner.gradientVec.x += xOffset;
+    trCorner.gradientVec.y += yOffset;
+    brCorner.x += xOffset;
+    brCorner.y += yOffset;
+    brCorner.gradientVec.x += xOffset;
+    brCorner.gradientVec.y += yOffset;
 
     // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
     vec2 tlDistanceVector;
@@ -136,7 +154,7 @@ void main()
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     //TexCoord = aTexCoord;
-    float noiseVal = layeredNoise(aPos.x + time * 100, aPos.z + time * 100, 4, 2, sin(time), tan(time));
+    float noiseVal = layeredNoise(aPos.x + time * 25, aPos.z + time * 25, 4, 2, sin(time), cos(time));
     if (noiseVal < -0.4) {
         ourColor = vec3(39.0 / 255, 88.0 / 255, 123.0 / 255);
     }
@@ -146,9 +164,9 @@ void main()
     else {
         ourColor = vec3(93.0 / 255, 92.0 / 255, 45.0 / 255);
     }
-    ourColor.x -= noiseVal / 2;
-    ourColor.y -= noiseVal / 2;
-    ourColor.z -= noiseVal / 2;
+    ourColor.x += noiseVal / 8;
+    ourColor.y += noiseVal / 8;
+    ourColor.z += noiseVal / 8;
 
 
 

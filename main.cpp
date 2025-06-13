@@ -36,7 +36,7 @@ const char *fragmentShaderSource;
 //     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
 //     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
-float vertices[54000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
+float vertices[486000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
 float cubeVertices[216]= {
     -0.5f, -0.5f, -0.5f, 
         0.5f, -0.5f, -0.5f,  
@@ -288,7 +288,7 @@ int main()
 
         // draw the object
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 54000000); 
+        glDrawArrays(GL_TRIANGLES, 0, 486000000 / 6); 
 
         // world transformation
         lightPos[2] += sin(timeValue) * 10;

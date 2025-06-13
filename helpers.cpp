@@ -37,8 +37,8 @@ int scroll = 0;
 GLFWwindow* window;
 int lastX, lastY;
 float xoffset, yaw, pitch;
-int width = 1000;
-int height = 1000;
+int width = 3000;
+int height = 3000;
 
 const char* readFile(string path) {
     ostringstream sstream;
