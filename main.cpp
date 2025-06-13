@@ -3,6 +3,7 @@
 #include "khrplatform.h"
 #include <GLFW/glfw3.h>
 #include "inttypes.h"
+#include <cinttypes>
 #include <ostream>
 #include <iostream>
 #include "helpers.h"
@@ -129,30 +130,31 @@ void makeFaces() {
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
-    noiseMap = generateNoiseMap(width + 1, width + 1, 4, 0.2, 6, 1, 0, 0, 0, 0, 0, 123);
+    noiseMap = generateNoiseMap(width + 1, width + 1, 4, 0.5, 6, 1, 0, 0, 0, 0, 0, 123);
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
-            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
-            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
-            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
-            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
-            r = 0.1, g = 0.1, b = 0.1;
-            if (noiseMap[y][x] < -0.7) {
-                r = 39.0 / 255;
-                b = 88.0 / 255;
-                g = 123.0 / 255;
-            }
-            else if (noiseMap[y][x] < -0.3) {
-                r = 177.0 / 255;
-                b = 145.0 / 255;
-                g = 88.0 / 255;
-            }
-            else {
-                r = 93.0 / 255;
-                b = 92.0 / 255;
-                g = 45.0 / 255;
-            }
+            // noiseMap[y][x] * 45
+            bottomLeft = glm::vec3(x, 0, y);
+            bottomRight = glm::vec3(x + 1, 0, y);
+            topLeft = glm::vec3(x, 0, y + 1);
+            topRight = glm::vec3(x + 1, 0, y + 1);
+            // r = 0.1, g = 0.1, b = 0.1;
+            // if (noiseMap[y][x] < -0.7) {
+            //     r = 39.0 / 255;
+            //     b = 88.0 / 255;
+            //     g = 123.0 / 255;
+            // }
+            // else if (noiseMap[y][x] < -0.3) {
+            //     r = 177.0 / 255;
+            //     b = 145.0 / 255;
+            //     g = 88.0 / 255;
+            // }
+            // else {
+            //     r = 93.0 / 255;
+            //     b = 92.0 / 255;
+            //     g = 45.0 / 255;
+            // }
             normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
             currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2]);
             currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2]);
@@ -289,14 +291,14 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 54000000); 
 
         // world transformation
-        lightPos[2] += sin(timeValue) * 10;
+        // lightPos[2] += sin(timeValue) * 10;
         // also draw the lamp object
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        model = glm::scale(model, glm::vec3(5.0f)); // a smaller cube
         lightCubeShader.setMat4("model", model);
 
         glBindVertexArray(cubeVAO);
