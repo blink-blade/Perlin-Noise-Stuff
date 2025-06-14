@@ -316,9 +316,9 @@ int main()
         lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
         // point light 4
         lightingShader.setVec3("pointLights[3].position", pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
-        lightingShader.setVec3("pointLights[3].ambient", 0.0125f* 25, 0.0125f* 25, 0.0125f* 25);
-        lightingShader.setVec3("pointLights[3].diffuse", 0.8f* 25, 0.8f* 25, 0.8f* 25);
-        lightingShader.setVec3("pointLights[3].specular", 1.0f * 25, 1.0f* 25, 1.0f* 25);
+        lightingShader.setVec3("pointLights[3].ambient", 0.0125f* 1500000, 0.0125f* 1500000, 0.0125f* 1500000);
+        lightingShader.setVec3("pointLights[3].diffuse", 0.8f* 1500000, 0.8f* 1500000, 0.8f* 1500000);
+        lightingShader.setVec3("pointLights[3].specular", 1.0f * 1500000, 1.0f* 1500000, 1.0f* 1500000);
         lightingShader.setFloat("pointLights[3].constant", 1.0f);
         lightingShader.setFloat("pointLights[3].linear", 0.09f);
         lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
