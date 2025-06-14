@@ -16,11 +16,17 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "generator.h"
+#include "filesystem.h"
 
 using namespace std;
 
 // lighting
-glm::vec3 lightPos(500, 25.0, 0);
+glm::vec3 pointLightPositions[] = {
+	glm::vec3( 0.7f,  10.0f,  2.0f),
+	glm::vec3( 2.3f, 10.0f, -4.0f),
+	glm::vec3(-4.0f,  10.0f, -12.0f),
+	glm::vec3( 0.0f,  10.0f, -3.0f)
+}; 
 
 unsigned int vertexShader;
 unsigned int fragmentShader;
@@ -36,7 +42,7 @@ const char *fragmentShaderSource;
 //     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
 //     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
-float vertices[486000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
+float vertices[66000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
 float cubeVertices[216]= {
     -0.5f, -0.5f, -0.5f, 
         0.5f, -0.5f, -0.5f,  
@@ -87,7 +93,7 @@ float cubeVertices[216]= {
 // };
 double **noiseMap;
 
-int setVertex(int index, float x, float y, float z, float r, float b, float g, float nVX, float nVY, float nVZ) {
+int setVertex(int index, float x, float y, float z, float r, float b, float g, float nVX, float nVY, float nVZ, float tX, float tY) {
     int newIndex = index;
     vertices[newIndex] = x;
     newIndex += 1;
@@ -106,6 +112,10 @@ int setVertex(int index, float x, float y, float z, float r, float b, float g, f
     vertices[newIndex] = nVY;
     newIndex += 1;
     vertices[newIndex] = nVZ;
+    newIndex += 1;
+    vertices[newIndex] = tX;
+    newIndex += 1;
+    vertices[newIndex] = tY;
     return newIndex + 1;
 }
 
@@ -134,10 +144,10 @@ void makeFaces() {
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
-            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
-            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
-            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
-            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
+            bottomLeft = glm::vec3(x - 500, noiseMap[y][x] * 45, y - 500);
+            bottomRight = glm::vec3(x - 500 + 1, noiseMap[y][x + 1] * 45, y - 500);
+            topLeft = glm::vec3(x - 500, noiseMap[y + 1][x] * 45, y - 500 + 1);
+            topRight = glm::vec3(x - 500 + 1, noiseMap[y + 1][x + 1] * 45, y - 500 + 1);
             r = 0.1, g = 0.1, b = 0.1;
             if (noiseMap[y][x] < -0.7) {
                 r = 39.0 / 255;
@@ -155,13 +165,13 @@ void makeFaces() {
                 g = 45.0 / 255;
             }
             normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2]);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2]);
-            currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2]);
+            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
+            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
+            currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 1.0f);
             normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2]);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2]);
-            currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2]);
+            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
+            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
+            currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 0.0f);
         }   
     }
 
@@ -202,18 +212,14 @@ int main()
 
     glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
 
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-    // color attribute
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
-
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
     // first, configure the cube's VAO (and VBO)
     unsigned int cubeVAO;
@@ -228,15 +234,19 @@ int main()
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0); 
+
     int nrAttributes;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     cout << "Maximum nr of vertex attributes supported: " << nrAttributes << endl;
 
 // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
 
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/container2.png").c_str());
+    unsigned int specularMap = loadTexture(FileSystem::getPath("images/container2_specular.png").c_str());
+    
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -262,12 +272,56 @@ int main()
         // int vertexColorLocation = glGetUniformLocation(ourShader.ID, "timeOffsetColor");
         // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         // ourShader.setFloat("mixAmount", sin(timeValue));
+        float timeValue = glfwGetTime();
 
         lightingShader.use();
-        lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        lightingShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("lightPos", lightPos[0], lightPos[1], lightPos[2]); 
         lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
+        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lightingShader.setFloat("material.shininess", 32.0f);
+
+        // bind diffuse map
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
+        // bind specular map
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
+
+        lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        // point light 1
+        lightingShader.setVec3("pointLights[0].position", pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+        lightingShader.setVec3("pointLights[0].ambient", 0.0f, 0.05f* 25, 0.05f* 25);
+        lightingShader.setVec3("pointLights[0].diffuse", 0.0f, 0.8f* 25, 0.8f* 25);
+        lightingShader.setVec3("pointLights[0].specular", 0.0f, 1.0f* 25, 1.0f* 25);
+        lightingShader.setFloat("pointLights[0].constant", 1.0f);
+        lightingShader.setFloat("pointLights[0].linear", 0.09f);
+        lightingShader.setFloat("pointLights[0].quadratic", 0.032f);
+        // point light 2
+        lightingShader.setVec3("pointLights[1].position", pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
+        lightingShader.setVec3("pointLights[1].ambient", 0.05f* 25, 0.025f* 25, 0.025f* 25);
+        lightingShader.setVec3("pointLights[1].diffuse", 0.8f* 25, 0.4f* 25, 0.4f* 25);
+        lightingShader.setVec3("pointLights[1].specular", 1.0f* 25,0.5f* 25, 0.5f* 25);
+        lightingShader.setFloat("pointLights[1].constant", 1.0f);
+        lightingShader.setFloat("pointLights[1].linear", 0.09f);
+        lightingShader.setFloat("pointLights[1].quadratic", 0.032f);
+        // point light 3
+        lightingShader.setVec3("pointLights[2].position", pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
+        lightingShader.setVec3("pointLights[2].ambient", 0.0f * 25, 0.05f * 25, 0.0f * 25);
+        lightingShader.setVec3("pointLights[2].diffuse", 0.0f * 25, 0.8f * 25, 0.0f * 25);
+        lightingShader.setVec3("pointLights[2].specular", 0.0f * 25, 1.0f * 25, 0.0f * 25);
+        lightingShader.setFloat("pointLights[2].constant", 1.0f);
+        lightingShader.setFloat("pointLights[2].linear", 0.09f);
+        lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
+        // point light 4
+        lightingShader.setVec3("pointLights[3].position", pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
+        lightingShader.setVec3("pointLights[3].ambient", 0.0125f* 25, 0.0125f* 25, 0.0125f* 25);
+        lightingShader.setVec3("pointLights[3].diffuse", 0.8f* 25, 0.8f* 25, 0.8f* 25);
+        lightingShader.setVec3("pointLights[3].specular", 1.0f * 25, 1.0f* 25, 1.0f* 25);
+        lightingShader.setFloat("pointLights[3].constant", 1.0f);
+        lightingShader.setFloat("pointLights[3].linear", 0.09f);
+        lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
 
         glm::mat4 view;
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -275,7 +329,6 @@ int main()
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 10000.0f);
 
-        float timeValue = glfwGetTime();
         float greenValue = sin(timeValue);
         lightingShader.setFloat("timeOffsetColor", sin(timeValue));
         int viewLoc = glGetUniformLocation(lightingShader.ID, "view");
@@ -287,21 +340,28 @@ int main()
 
         // draw the object
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 486000000 / 6); 
+        glDrawArrays(GL_TRIANGLES, 0, 66000000 / 6); 
 
         // world transformation
-        lightPos[2] += sin(timeValue);
+        pointLightPositions[0].x += sin(timeValue) / 2;
+        pointLightPositions[1].y += sin(timeValue) / 2;
+        pointLightPositions[2].z += sin(timeValue) / 2;
+        pointLightPositions[3].x -= sin(timeValue) / 2;
+
         // also draw the lamp object
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(5.0f)); // a smaller cube
-        lightCubeShader.setMat4("model", model);
-
         glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 72);
+        for (unsigned int i = 0; i < 4; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(5.0f)); // Make it a smaller cube
+            lightCubeShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 72);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();    
     }

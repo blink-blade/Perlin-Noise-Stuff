@@ -33,6 +33,7 @@ extern int scroll;
 extern void processInput(GLFWwindow *window);
 extern void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 extern void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+extern unsigned int loadTexture(char const * path);
 extern int glfwInits();
 extern int width;
 extern int height;

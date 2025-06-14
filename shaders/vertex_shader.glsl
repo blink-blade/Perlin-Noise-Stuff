@@ -2,9 +2,10 @@
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
 layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
 layout (location = 2) in vec3 aNormal; 
+layout (location = 3) in vec2 aTexCoords; 
 
 out vec3 ourColor; // output a color to the fragment shader
-out vec2 TexCoord;
+out vec2 TexCoords;
 uniform float time;
 uniform mat4 view;
 uniform mat4 projection;
@@ -50,7 +51,7 @@ void main()
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     ourColor = aColor;
-    //TexCoord = aTexCoord;
+    TexCoords = aTexCoords;
     gl_Position = projection * view * vec4(FragPos.x, FragPos.y, FragPos.z, 1.0);
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
     Normal = aNormal;
