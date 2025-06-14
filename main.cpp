@@ -140,7 +140,7 @@ void makeFaces() {
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
-    noiseMap = generateNoiseMap(width + 1, width + 1, 4, 0.5, 6, 1, 0, 0, 0, 0, 0, 123);
+    noiseMap = generateNoiseMap(width + 1, width + 1, 4, 2, 6, 1, 0, 0, 0, 0, 0, 123);
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             // I believe we need to go in a counter-clockwise order of vertices.
@@ -244,8 +244,8 @@ int main()
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/container2.png").c_str());
-    unsigned int specularMap = loadTexture(FileSystem::getPath("images/container2_specular.png").c_str());
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
+    unsigned int specularMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
     
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
@@ -286,7 +286,7 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
-        lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        lightingShader.setVec3("dirLight.direction", -0.0f, -1.0f, 0.0f);
         lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);

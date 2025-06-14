@@ -35,7 +35,6 @@ struct Material {
 };  
   
 uniform vec4 timeOffsetColor;
-uniform sampler2D texture1;
 uniform float mixAmount;
 uniform vec3 viewPos;
 uniform Material material;
