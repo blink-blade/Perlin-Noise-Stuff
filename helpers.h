@@ -13,6 +13,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
+#include "shader.h"
 #define STB_IMAGE_IMPLEMENTATION
 
 #ifndef HELPERS
@@ -24,6 +25,7 @@ using namespace std;
 //     SDL_Texture* texture;
 // };
 extern int scroll;
+extern int pointLightCount;
 // extern bool running;
 // extern const uint8_t* keys;
 // extern SDL_Window* window;
@@ -51,5 +53,4 @@ extern float cameraSpeed;
 extern float deltaTime;	// Time between current frame and last frame
 extern float lastFrame; // Time of last frame
 extern GLFWwindow* window;
-
 #endif

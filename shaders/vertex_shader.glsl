@@ -40,20 +40,19 @@ float rand(vec2 co) {
 void main()
 {
     FragPos = vec3(vec4(aPos, 1.0));
-    mat4 translation = mat4(1.0, 0.0, 0.0, -0.0f,
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, -0.0f,
-                0.0, 0.0, 0.0, 1.0);
-    mat4 rotMatrix = rotationMatrix(0.0f, time + (sin(distance(aPos, vec3(0.0, 0.0, 0.0))) / 10), 0.0f);
+    //mat4 translation = mat4(1.0, 0.0, 0.0, -1000.0f,
+          //      0.0, 1.0, 0.0, 0.0,
+        //        0.0, 0.0, 1.0, -1000.0f,
+      //          0.0, 0.0, 0.0, 1.0);
+    //mat4 rotMatrix = rotationMatrix(0.0f, 0.0f, 0.0f);
     //gl_Position = projection * view * (vec4(aPos.x + (sin(time + (aPos.z / 25)) * 25), aPos.y + (cos(time + (aPos.y / 25)) * 25), aPos.z + (cos(time + (aPos.x / 25)) * 25), 1.0) * translation * rotMatrix);
     //gl_Position = projection * view * (vec4(aPos.x, aPos.y, aPos.z, 1.0));
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
-    ourColor = vec3(aColor.x + (sin(time + (aPos.y / 25)) * 5), aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
+    //ourColor = aColor;
     TexCoords = aTexCoords;
     gl_Position = projection * view * vec4(FragPos.x, FragPos.y, FragPos.z, 1.0);
-    gl_Position = projection * view * (vec4(aPos.x + (sin(time + (aPos.z / 25)) * 25), aPos.y + (cos(time + (aPos.y / 25)) * 125), aPos.z + (cos(time + (aPos.x / 25)) * 25), 1.0) * translation * rotMatrix);
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
     Normal = aNormal;
 }

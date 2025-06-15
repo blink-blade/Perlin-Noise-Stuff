@@ -16,6 +16,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include "shader.h"
 
 using namespace std;
 
@@ -39,6 +40,7 @@ int lastX, lastY;
 float xoffset, yaw, pitch;
 int width = 1000;
 int height = 1000;
+int pointLightCount = 0;
 
 const char* readFile(string path) {
     ostringstream sstream;
