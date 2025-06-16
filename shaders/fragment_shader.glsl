@@ -16,7 +16,7 @@ struct PointLight {
     vec3 diffuse;
     vec3 specular;
 };  
-#define NR_POINT_LIGHTS 1000
+#define NR_POINT_LIGHTS 100
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform int pointLightCount;
 

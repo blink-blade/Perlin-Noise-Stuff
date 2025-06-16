@@ -114,6 +114,7 @@ public:
         model = glm::translate(model, position);
         model = glm::scale(model, glm::vec3(scale)); // Make it a smaller cube
         shaderArg.setMat4("model", model);
+        glm::vec3 vec = specularColor + diffuseColor + ambientColor;
         shaderArg.setVec3("color", specularColor.x, specularColor.y, specularColor.z);
         glDrawArrays(GL_TRIANGLES, 0, 72);
     }

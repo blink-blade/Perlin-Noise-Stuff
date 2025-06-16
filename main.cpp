@@ -187,7 +187,7 @@ int main()
     glfwInits();
     Shader lightingShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
     Shader lightCubeShader("shaders/light_vertex_shader.glsl", "shaders/light_fragment_shader.glsl");
-
+    
     makeFaces();
 
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
@@ -203,7 +203,7 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 
-    glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
+    // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -237,24 +237,27 @@ Light lights[1000];
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
-    unsigned int specularMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
-    
-    for (int i = 0; i < 1000; i++) {
-        float r = sin(rand()) / 2 + 0.5;
-        float b = sin(rand()) / 2 + 0.5;
-        float g = sin(rand()) / 2 + 0.5;
-        Light light(2.0, glm::vec3(sin(rand()) * 800, 30, sin(rand()) * 800), glm::vec3(r / 20, b / 20, g / 20), glm::vec3(r / 1.25, b / 1.25, g / 1.25), glm::vec3(r, g, b), 50, lightingShader);
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
+    unsigned int specularMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
+    srand(time(0));
+    Light light;
+    for (int i = 0; i < 100; i++) {
+        float r = sin(rand()) * 0.5 + 0.5;
+        float b = sin(rand()) * 0.5 + 0.5;
+        float g = sin(rand()) * 0.5 + 0.5;
+        light = Light(2.0, glm::vec3(sin(rand()) * 200, 30, sin(rand()) * 200), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 50, lightingShader);
         light.init(lightingShader);
-        lights[i] = light;
+        lights[light.ID] = light;
     }
-    
+
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;  
-        cout << "\n" << deltaTime;
-        cameraSpeed = 100.5f * deltaTime;
+        // cout << "\n" << deltaTime;
+        const char* text = to_string(1000 / deltaTime / 1000).c_str();
+        glfwSetWindowTitle(window, text);
+        cameraSpeed = 500.5f * deltaTime;
         processInput(window);
         scroll = 0;
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -303,7 +306,7 @@ Light lights[1000];
         int viewLoc = glGetUniformLocation(lightingShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         int projectionLoc = glGetUniformLocation(lightingShader.ID, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv( projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
         int timeLoc = glGetUniformLocation(lightingShader.ID, "time");
         glUniform1f(timeLoc, (float)glfwGetTime());
 
@@ -320,9 +323,9 @@ Light lights[1000];
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
         glBindVertexArray(cubeVAO);
-        // for (int i = 0; i < pointLightCount; i++) {
-        //     lights[i].render(lightCubeShader);
-        // }
+        for (int i = 0; i < pointLightCount; i++) {
+            lights[i].render(lightCubeShader);
+        }
 
 
         glfwSwapBuffers(window);
