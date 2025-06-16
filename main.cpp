@@ -242,10 +242,10 @@ Light lights[1000];
     srand(time(0));
     Light light;
     for (int i = 0; i < 100; i++) {
-        float r = sin(rand()) * 0.5 + 0.5;
-        float b = sin(rand()) * 0.5 + 0.5;
-        float g = sin(rand()) * 0.5 + 0.5;
-        light = Light(2.0, glm::vec3(sin(rand()) * 200, 30, sin(rand()) * 200), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 50, lightingShader);
+        float r = round(sin(rand()) * 0.5 + 0.5);
+        float b = round(sin(rand()) * 0.5 + 0.5);
+        float g = round(sin(rand()) * 0.5 + 0.5);
+        light = Light(2.0, glm::vec3(sin(rand()) * 400, 30, sin(rand()) * 400), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 50, lightingShader);
         light.init(lightingShader);
         lights[light.ID] = light;
     }
