@@ -35,7 +35,7 @@ const char *fragmentShaderSource;
 //     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
 //     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
-float vertices[66000000]; //width * height * 6 * 6.       * 6 for (x, y, z, r, g, b) and * 6 for six vertices on each face.
+float vertices[66000000]; //width * height * 11.       * 11 for (x, y, z, r, g, b, ect) and * 6 for six vertices on each face.
 float cubeVertices[216]= {
     -0.5f, -0.5f, -0.5f, 
         0.5f, -0.5f, -0.5f,  
@@ -125,49 +125,54 @@ glm::vec3 calculateSurfaceNormal(const glm::vec3& p1, const glm::vec3& p2, const
 	return glm::normalize(normal);
 }
 
+int getIndexOfPoint(int x, int z) {
+    return (x + width*z);
+}
+
 void makeFaces() {
-    int faceIndex, currentIndex, firstTriangleIndex, secondTriangleIndex;
-    glm::vec3 bottomLeft, bottomRight, topLeft, topRight, normal;
+    int currentIndex, bottomLeftIndex, bottomRightIndex, topLeftIndex, topRightIndex;
+    glm::vec3 bottomLeft, bottomRight, topLeft, topRight, pos, normal;
     float r = 1, g = 1, b = 1;
     currentIndex = 0;
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
     noiseMap = generateNoiseMap(width + 1, width + 1, 4, 2, 6, 1, 0, 0, 0, 0, 0, 123);
+            // r = 0.1, g = 0.1, b = 0.1;
+            // if (noiseMap[y][x] < -0.7) {
+            //     r = 39.0 / 255;
+            //     b = 88.0 / 255;
+            //     g = 123.0 / 255;
+            // }
+            // else if (noiseMap[y][x] < -0.3) {
+            //     r = 177.0 / 255;
+            //     b = 145.0 / 255;
+            //     g = 88.0 / 255;
+            // }
+            // else {
+            //     r = 93.0 / 255;
+            //     b = 92.0 / 255;
+            //     g = 45.0 / 255;
+            // }
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
-            // I believe we need to go in a counter-clockwise order of vertices.
             bottomLeft = glm::vec3(x - 500, noiseMap[y][x] * 45, y - 500);
             bottomRight = glm::vec3(x - 500 + 1, noiseMap[y][x + 1] * 45, y - 500);
             topLeft = glm::vec3(x - 500, noiseMap[y + 1][x] * 45, y - 500 + 1);
             topRight = glm::vec3(x - 500 + 1, noiseMap[y + 1][x + 1] * 45, y - 500 + 1);
-            r = 0.1, g = 0.1, b = 0.1;
-            if (noiseMap[y][x] < -0.7) {
-                r = 39.0 / 255;
-                b = 88.0 / 255;
-                g = 123.0 / 255;
-            }
-            else if (noiseMap[y][x] < -0.3) {
-                r = 177.0 / 255;
-                b = 145.0 / 255;
-                g = 88.0 / 255;
-            }
-            else {
-                r = 93.0 / 255;
-                b = 92.0 / 255;
-                g = 45.0 / 255;
-            }
+
+
             normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
-            currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 1.0f);
+                    currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
+        currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
+        currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 1.0f);
             normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
-            currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 0.0f);
+        currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
+        currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
+        currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 0.0f);
+            
         }   
     }
-
     // glm::vec3 av = glm::vec3(-0.5f, -0.5f, -0.5f);
     // glm::vec3 bv = glm::vec3(0.5f, -0.5f, -0.5f);
     // glm::vec3 cv = glm::vec3(0.5f, 0.5f, -0.5f);
@@ -201,7 +206,6 @@ int main()
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
 
     // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
 
@@ -237,30 +241,48 @@ Light lights[1000];
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
-    unsigned int specularMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
+    unsigned int specularMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
     srand(time(0));
     Light light;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 1000; i++) {
         float r = round(sin(rand()) * 0.5 + 0.5);
         float b = round(sin(rand()) * 0.5 + 0.5);
         float g = round(sin(rand()) * 0.5 + 0.5);
-        light = Light(2.0, glm::vec3(sin(rand()) * 400, 30, sin(rand()) * 400), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 50, lightingShader);
+        light = Light(2.0, glm::vec3(sin(rand()) * 400, 30, sin(rand()) * 400), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 25, lightingShader);
         light.init(lightingShader);
         lights[light.ID] = light;
     }
 
+    const char* text = to_string(1000 / deltaTime / 1000).c_str();
+    int jeffy = 0;
+    float deltaTimeList[50];
+    for (int i = 0; i < pointLightCount; i++) {
+        lights[i].setPosition(glm::vec3(lights[i].position.x + sin(1), lights[i].position.y, lights[i].position.z + cos(1)), lightingShader);
+    }
+
+    // 18 fps when looking down at the entire map with half the screen. (I go up until I can barely see the entire map)
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;  
         // cout << "\n" << deltaTime;
-        const char* text = to_string(1000 / deltaTime / 1000).c_str();
-        glfwSetWindowTitle(window, text);
+        deltaTimeList[jeffy] = deltaTime;
+        jeffy += 1;
+        // cout << jeffy << " " << jeffy % 50 << "\n";
+        if (jeffy % 50 == 0) {
+            jeffy = 0;
+            float total = 0;
+            for (int i = 0; i < 50; i++) {
+                total += deltaTimeList[i];
+            }
+            text = to_string(1000 / (total / 50) / 1000).c_str();
+            glfwSetWindowTitle(window, text);
+        }
+        // cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << "\n";
         cameraSpeed = 500.5f * deltaTime;
         processInput(window);
-        scroll = 0;
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // glm::mat4 trans = glm::mat4(1.0f);
         // trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(1.0, 1.0, 0.0));
@@ -278,11 +300,6 @@ Light lights[1000];
         // ourShader.setFloat("mixAmount", sin(timeValue));
         float timeValue = glfwGetTime();
 
-        lightingShader.use();
-        lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
-        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-        lightingShader.setFloat("material.shininess", 32.0f);
-
         // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -290,16 +307,23 @@ Light lights[1000];
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
-        lightingShader.setVec3("dirLight.direction", -0.0f, -1.0f, 0.0f);
-        lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
 
         glm::mat4 view;
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 10000.0f);
+
+
+        lightingShader.use();
+        lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
+        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lightingShader.setFloat("material.shininess", 32.0f);
+        lightingShader.setVec3("dirLight.direction", -0.0f, -1.0f, 0.0f);
+        lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
         float greenValue = sin(timeValue);
         lightingShader.setFloat("timeOffsetColor", sin(timeValue));
@@ -310,13 +334,12 @@ Light lights[1000];
         int timeLoc = glGetUniformLocation(lightingShader.ID, "time");
         glUniform1f(timeLoc, (float)glfwGetTime());
 
+
         // draw the object
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 66000000 / 6); 
+        glDrawArrays(GL_TRIANGLES, 0, 66000000 / 6);
 
-        for (int i = 0; i < pointLightCount; i++) {
-            lights[i].setPosition(glm::vec3(lights[i].position.x + sin(timeValue), lights[i].position.y, lights[i].position.z + cos(timeValue)), lightingShader);
-        }
+
 
         // also draw the lamp object
         lightCubeShader.use();

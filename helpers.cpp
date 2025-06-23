@@ -40,6 +40,8 @@ int lastX, lastY;
 float xoffset, yaw, pitch;
 int width = 1000;
 int height = 1000;
+int windowWidth;
+int windowHeight;
 int pointLightCount = 0;
 
 const char* readFile(string path) {
@@ -176,6 +178,8 @@ unsigned int loadTexture(char const * path) {
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    windowWidth = width;
+    windowHeight = height;
 }  
 
 int glfwInits()

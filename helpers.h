@@ -39,6 +39,8 @@ extern unsigned int loadTexture(char const * path);
 extern int glfwInits();
 extern int width;
 extern int height;
+extern int windowWidth;
+extern int windowHeight;
 extern const char* readFile(string path);
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraTarget;
