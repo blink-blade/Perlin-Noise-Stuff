@@ -1,9 +1,10 @@
 #version 460 core
 out vec4 FragColor;
-in vec3 ourColor;
+in vec3 tileColor;
 in vec2 TexCoords;
 in vec3 Normal;  
 in vec3 FragPos; 
+in float type;
 
 struct PointLight {    
     vec3 position;
@@ -47,7 +48,17 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    float shininess = 0.0;
+    if (type == 0.0) {
+        shininess = 32.0;
+    }
+    else if (type == 1.0) {
+        shininess = 5.0;
+    }
+    else {
+        shininess = 2.0;
+    }
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     // combine results
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));
     vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
@@ -62,7 +73,17 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    float shininess = 0.0;
+    if (type == 0.0) {
+        shininess = 32.0;
+    }
+    else if (type == 1.0) {
+        shininess = 5.0;
+    }
+    else {
+        shininess = 2.0;
+    }
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     // attenuation
     float distance    = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + 

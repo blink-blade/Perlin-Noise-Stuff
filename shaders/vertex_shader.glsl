@@ -3,14 +3,18 @@ layout (location = 0) in vec3 aPos; // the position variable has attribute posit
 layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
 layout (location = 2) in vec3 aNormal; 
 layout (location = 3) in vec2 aTexCoords; 
+layout (location = 4) in float aType; 
 
-out vec3 ourColor; // output a color to the fragment shader
+out vec3 tileColor; // output a color to the fragment shader
 out vec2 TexCoords;
 uniform float time;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec3 offsets[100];
 out vec3 FragPos;  
 out vec3 Normal;
+out float type;
+
 
 mat4 rotationMatrix(float angleX, float angleY, float angleZ) {
     float cX = cos(angleX);
@@ -39,7 +43,7 @@ float rand(vec2 co) {
 
 void main()
 {
-    FragPos = vec3(vec4(aPos, 1.0));
+    FragPos = vec3(vec4(aPos.x + offsets[gl_InstanceID].x, aPos.y + offsets[gl_InstanceID].y, aPos.z + offsets[gl_InstanceID].z, 1.0));
     //mat4 translation = mat4(1.0, 0.0, 0.0, -1000.0f,
           //      0.0, 1.0, 0.0, 0.0,
         //        0.0, 0.0, 1.0, -1000.0f,
@@ -50,8 +54,9 @@ void main()
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
-    //ourColor = aColor;
+    tileColor = aColor;
     TexCoords = aTexCoords;
+    type = aType;
     gl_Position = projection * view * vec4(FragPos.x, FragPos.y, FragPos.z, 1.0);
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
     Normal = aNormal;

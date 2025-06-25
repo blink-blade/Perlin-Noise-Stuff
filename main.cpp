@@ -35,7 +35,8 @@ const char *fragmentShaderSource;
 //     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
 //     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
-float vertices[66000000]; //width * height * 11.       * 11 for (x, y, z, r, g, b, ect) and * 6 for six vertices on each face.
+glm::vec3 translations[100];
+float vertices[72000000]; //width * height * 12.       * 12 for (x, y, z, r, g, b, ect) and * 6 for six vertices on each face.
 float cubeVertices[216]= {
     -0.5f, -0.5f, -0.5f, 
         0.5f, -0.5f, -0.5f,  
@@ -86,7 +87,7 @@ float cubeVertices[216]= {
 // };
 double **noiseMap;
 
-int setVertex(int index, float x, float y, float z, float r, float b, float g, float nVX, float nVY, float nVZ, float tX, float tY) {
+int setVertex(int index, float x, float y, float z, float r, float b, float g, float nVX, float nVY, float nVZ, float tX, float tY, int type) {
     int newIndex = index;
     vertices[newIndex] = x;
     newIndex += 1;
@@ -109,6 +110,8 @@ int setVertex(int index, float x, float y, float z, float r, float b, float g, f
     vertices[newIndex] = tX;
     newIndex += 1;
     vertices[newIndex] = tY;
+    newIndex += 1;
+    vertices[newIndex] = type;
     return newIndex + 1;
 }
 
@@ -132,45 +135,57 @@ int getIndexOfPoint(int x, int z) {
 void makeFaces() {
     int currentIndex, bottomLeftIndex, bottomRightIndex, topLeftIndex, topRightIndex;
     glm::vec3 bottomLeft, bottomRight, topLeft, topRight, pos, normal;
-    float r = 1, g = 1, b = 1;
+    float r = 1, g = 1, b = 1, tL, tB, tR, tT, type;
     currentIndex = 0;
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
-    noiseMap = generateNoiseMap(width + 1, width + 1, 4, 2, 6, 1, 0, 0, 0, 0, 0, 123);
-            // r = 0.1, g = 0.1, b = 0.1;
-            // if (noiseMap[y][x] < -0.7) {
-            //     r = 39.0 / 255;
-            //     b = 88.0 / 255;
-            //     g = 123.0 / 255;
-            // }
-            // else if (noiseMap[y][x] < -0.3) {
-            //     r = 177.0 / 255;
-            //     b = 145.0 / 255;
-            //     g = 88.0 / 255;
-            // }
-            // else {
-            //     r = 93.0 / 255;
-            //     b = 92.0 / 255;
-            //     g = 45.0 / 255;
-            // }
+    noiseMap = generateNoiseMap(width + 1, width + 1, 8, 0.3, 6, 1, 0, 0, 0, 0, 0, 123);
+
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             bottomLeft = glm::vec3(x - 500, noiseMap[y][x] * 45, y - 500);
             bottomRight = glm::vec3(x - 500 + 1, noiseMap[y][x + 1] * 45, y - 500);
             topLeft = glm::vec3(x - 500, noiseMap[y + 1][x] * 45, y - 500 + 1);
             topRight = glm::vec3(x - 500 + 1, noiseMap[y + 1][x + 1] * 45, y - 500 + 1);
-
-
+            if (noiseMap[y][x] < -0.7) {
+                type = 0.0;
+                tL = 0.0f / 1024.0f;
+                tB = 0.0f / 1024.0f;
+                tR = 16.0 / 1024.0f;
+                tT = 16.0 / 1024.0f;
+                // r = 39.0 / 255;
+                // b = 88.0 / 255;
+                // g = 123.0 / 255;
+            }
+            else if (noiseMap[y][x] < -0.55) {
+                type = 1.0;
+                tL = 16.0f / 1024.0f;
+                tB = 0.0f / 1024.0f;
+                tR = 32.0f / 1024.0f;
+                tT = 16.0f / 1024.0f;
+                // r = 177.0 / 255;
+                // b = 145.0 / 255;
+                // g = 88.0 / 255;
+            }
+            else {
+                type = 2.0;
+                tL = 32.0f / 1024.0f;
+                tB = 0.0f / 1024.0f;
+                tR = 48.0f / 1024.0f;
+                tT = 16.0f / 1024.0f;
+                // r = 93.0 / 255;
+                // b = 92.0 / 255;
+                // g = 45.0 / 255;
+            }
             normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
-                    currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
-        currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
-        currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 1.0f);
+            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tB, type);
+            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
+            currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tT, type);
             normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
-        currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], 0.0f, 0.0f);
-        currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 1.0f);
-        currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2], 1.0f, 0.0f);
-            
+            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tB, type);
+            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
+            currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tB, type);
         }   
     }
     // glm::vec3 av = glm::vec3(-0.5f, -0.5f, -0.5f);
@@ -194,7 +209,6 @@ int main()
     Shader lightCubeShader("shaders/light_vertex_shader.glsl", "shaders/light_fragment_shader.glsl");
     
     makeFaces();
-
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
     // Rendering stuff.
@@ -209,14 +223,16 @@ int main()
 
     // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(9 * sizeof(float)));
     glEnableVertexAttribArray(3);
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(11 * sizeof(float)));
+    glEnableVertexAttribArray(4);
 
     // first, configure the cube's VAO (and VBO)
     unsigned int cubeVAO;
@@ -241,26 +257,31 @@ Light lights[1000];
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
-    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
-    unsigned int specularMap = loadTexture(FileSystem::getPath("images/john.png").c_str());
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/spritesheet.png").c_str());
+    unsigned int specularMap = loadTexture(FileSystem::getPath("images/spritesheetspecularmap.png").c_str());
     srand(time(0));
     Light light;
-    for (int i = 0; i < 1000; i++) {
-        float r = round(sin(rand()) * 0.5 + 0.5);
-        float b = round(sin(rand()) * 0.5 + 0.5);
-        float g = round(sin(rand()) * 0.5 + 0.5);
-        light = Light(2.0, glm::vec3(sin(rand()) * 400, 30, sin(rand()) * 400), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 25, lightingShader);
-        light.init(lightingShader);
-        lights[light.ID] = light;
-    }
+    // for (int i = 0; i < 1000; i++) {
+    //     float r = round(sin(rand()) * 0.5 + 0.5);
+    //     float b = round(sin(rand()) * 0.5 + 0.5);
+    //     float g = round(sin(rand()) * 0.5 + 0.5);
+    //     light = Light(2.0, glm::vec3(sin(rand()) * 400, 30, sin(rand()) * 400), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 25, lightingShader);
+    //     light.init(lightingShader);
+    //     lights[light.ID] = light;
+    // }
 
     const char* text = to_string(1000 / deltaTime / 1000).c_str();
     int jeffy = 0;
     float deltaTimeList[50];
-    for (int i = 0; i < pointLightCount; i++) {
-        lights[i].setPosition(glm::vec3(lights[i].position.x + sin(1), lights[i].position.y, lights[i].position.z + cos(1)), lightingShader);
+    for (int x = 0; x < 10; x++) {
+        for (int z = 0; z < 10; z++) {
+            translations[x + 10*z].x = x * 1000;
+            translations[x + 10*z].z = z * 1000;
+        }
     }
-
+    for(unsigned int i = 0; i < 100; i++) {
+        lightingShader.setVec3(("offsets[" + std::to_string(i) + "]"), translations[i].x, translations[i].y, translations[i].z);
+    }  
     // 18 fps when looking down at the entire map with half the screen. (I go up until I can barely see the entire map)
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
@@ -318,12 +339,11 @@ Light lights[1000];
 
         lightingShader.use();
         lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
-        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-        lightingShader.setFloat("material.shininess", 32.0f);
+        lightingShader.setFloat("material.shininess", 1.0f);
         lightingShader.setVec3("dirLight.direction", -0.0f, -1.0f, 0.0f);
-        lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("dirLight.ambient", 0.05f * 2, 0.05f * 2, 0.05f * 2);
+        lightingShader.setVec3("dirLight.diffuse", 0.4f * 2, 0.4f * 2, 0.4f * 2);
+        lightingShader.setVec3("dirLight.specular", 0.5f * 2, 0.5f * 2, 0.5f * 2);
 
         float greenValue = sin(timeValue);
         lightingShader.setFloat("timeOffsetColor", sin(timeValue));
@@ -337,9 +357,8 @@ Light lights[1000];
 
         // draw the object
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 66000000 / 6);
-
-
+        // glDrawArrays(GL_TRIANGLES, 0, 72000000 / 6);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 72000000 / 12, 50); 
 
         // also draw the lamp object
         lightCubeShader.use();
