@@ -1,9 +1,8 @@
 #version 460 core
 out vec4 FragColor;
 in vec3 tileColor;
-in vec2 TexCoords;
-in vec3 Normal;  
 in vec3 FragPos; 
+in vec2 TexCoords;
 in float type;
 
 struct PointLight {    
@@ -39,7 +38,10 @@ struct Material {
 uniform vec4 timeOffsetColor;
 uniform float mixAmount;
 uniform vec3 viewPos;
+uniform int width;
+uniform int height;
 uniform Material material;
+uniform sampler2D heightTexture;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
@@ -98,9 +100,29 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     return (ambient + diffuse + specular);
 } 
 
+
+vec3 getNormal() {
+    vec2 pos = vec2(int(TexCoords.x * width), int(TexCoords.y * height));
+    vec3 bottomLeft = vec3(FragPos.x, texture(heightTexture, vec2(FragPos.x / width, FragPos.z / height)).r, FragPos.z);
+    vec3 bottomRight = vec3(FragPos.x + 1, texture(heightTexture, vec2(FragPos.x + 1 / width, FragPos.z / height)).r, FragPos.z);
+    vec3 topLeft = vec3(FragPos.x, texture(heightTexture, vec2(FragPos.x / width, FragPos.z + 1 / height)).r, FragPos.z + 1);
+    vec3 topRight = vec3(FragPos.x + 1, texture(heightTexture, vec2(FragPos.x + 1 / height, FragPos.z + 1 / height)).r, FragPos.z + 1);
+
+
+    vec3 U = topLeft - bottomLeft;
+	vec3 V = topRight - bottomLeft;
+
+	vec3 normal;
+	normal.x = (U.y * V.z) - (U.z * V.y);
+	normal.y = (U.z * V.x) - (U.x * V.z);
+	normal.z = (U.x * V.y) - (U.y * V.x);
+
+    return normalize(normal);
+}
 void main() {
-    // properties
-    vec3 norm = normalize(Normal);
+    
+    vec3 norm = getNormal();
+
     vec3 viewDir = normalize(viewPos - FragPos);
     // phase 1: Directional lighting
     vec3 result = CalcDirLight(dirLight, norm, viewDir);

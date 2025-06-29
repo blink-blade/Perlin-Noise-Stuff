@@ -13,6 +13,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <vector>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -36,7 +37,7 @@ const char *fragmentShaderSource;
 //     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   
 // };
 glm::vec3 translations[100];
-float vertices[72000000]; //width * height * 12.       * 12 for (x, y, z, r, g, b, ect) and * 6 for six vertices on each face.
+float vertices[54000000]; //width * height * 9.       * 12 for (x, y, z, r, g, b, ect) and * 6 for six vertices on each face.
 float cubeVertices[216]= {
     -0.5f, -0.5f, -0.5f, 
         0.5f, -0.5f, -0.5f,  
@@ -101,12 +102,12 @@ int setVertex(int index, float x, float y, float z, float r, float b, float g, f
     newIndex += 1;
     vertices[newIndex] = b;
     newIndex += 1;
-    vertices[newIndex] = nVX;
-    newIndex += 1;
-    vertices[newIndex] = nVY;
-    newIndex += 1;
-    vertices[newIndex] = nVZ;
-    newIndex += 1;
+    // vertices[newIndex] = nVX;
+    // newIndex += 1;
+    // vertices[newIndex] = nVY;
+    // newIndex += 1;
+    // vertices[newIndex] = nVZ;
+    // newIndex += 1;
     vertices[newIndex] = tX;
     newIndex += 1;
     vertices[newIndex] = tY;
@@ -132,6 +133,7 @@ int getIndexOfPoint(int x, int z) {
     return (x + width*z);
 }
 
+
 void makeFaces() {
     int currentIndex, bottomLeftIndex, bottomRightIndex, topLeftIndex, topRightIndex;
     glm::vec3 bottomLeft, bottomRight, topLeft, topRight, pos, normal;
@@ -144,10 +146,10 @@ void makeFaces() {
 
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
-            bottomLeft = glm::vec3(x - 500, noiseMap[y][x] * 45, y - 500);
-            bottomRight = glm::vec3(x - 500 + 1, noiseMap[y][x + 1] * 45, y - 500);
-            topLeft = glm::vec3(x - 500, noiseMap[y + 1][x] * 45, y - 500 + 1);
-            topRight = glm::vec3(x - 500 + 1, noiseMap[y + 1][x + 1] * 45, y - 500 + 1);
+            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
+            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
+            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
+            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
             if (noiseMap[y][x] < -0.7) {
                 type = 0.0;
                 tL = 0.0f / 1024.0f;
@@ -178,16 +180,23 @@ void makeFaces() {
                 // b = 92.0 / 255;
                 // g = 45.0 / 255;
             }
+            tR -= 0.001;
+            tT -= 0.001;
+            // tL = (float)x / width;
+            // tB = (float)y / height;
+            // tR = ((float)x + 1) / width;
+            // tT = ((float)y + 1) / height;
             normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
             currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tB, type);
             currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
             currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tT, type);
             normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
             currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tB, type);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
             currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tB, type);
+            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
         }   
     }
+    
     // glm::vec3 av = glm::vec3(-0.5f, -0.5f, -0.5f);
     // glm::vec3 bv = glm::vec3(0.5f, -0.5f, -0.5f);
     // glm::vec3 cv = glm::vec3(0.5f, 0.5f, -0.5f);
@@ -207,7 +216,6 @@ int main()
     glfwInits();
     Shader lightingShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
     Shader lightCubeShader("shaders/light_vertex_shader.glsl", "shaders/light_fragment_shader.glsl");
-    
     makeFaces();
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
@@ -223,16 +231,14 @@ int main()
 
     // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(9 * sizeof(float)));
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(11 * sizeof(float)));
-    glEnableVertexAttribArray(4);
 
     // first, configure the cube's VAO (and VBO)
     unsigned int cubeVAO;
@@ -256,7 +262,9 @@ Light lights[1000];
 // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
-
+    lightingShader.setInt("heightTexture", 2);
+    lightingShader.setInt("width", width);
+    lightingShader.setInt("height", height);
     unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/spritesheet.png").c_str());
     unsigned int specularMap = loadTexture(FileSystem::getPath("images/spritesheetspecularmap.png").c_str());
     srand(time(0));
@@ -282,6 +290,24 @@ Light lights[1000];
     for(unsigned int i = 0; i < 100; i++) {
         lightingShader.setVec3(("offsets[" + std::to_string(i) + "]"), translations[i].x, translations[i].y, translations[i].z);
     }  
+
+    vector<float> flatData(width * height);
+    for (int y = 0; y < height; ++y)
+        for (int x = 0; x < width; ++x)
+            flatData[y * width + x] = noiseMap[y][x];  // or float**[y][x]
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Upload the float data
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, flatData.data());
+
+    // Set texture filtering and wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // or GL_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // or GL_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
     // 18 fps when looking down at the entire map with half the screen. (I go up until I can barely see the entire map)
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
@@ -327,7 +353,9 @@ Light lights[1000];
         // bind specular map
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
-
+        // bind height map
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textureID);
 
 
         glm::mat4 view;
@@ -358,7 +386,7 @@ Light lights[1000];
         // draw the object
         glBindVertexArray(VAO);
         // glDrawArrays(GL_TRIANGLES, 0, 72000000 / 6);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 72000000 / 12, 50); 
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 
         // also draw the lamp object
         lightCubeShader.use();
