@@ -14,7 +14,6 @@ out vec3 FragPos;
 out vec3 Normal;
 out float type;
 
-
 mat4 rotationMatrix(float angleX, float angleY, float angleZ) {
     float cX = cos(angleX);
     float sX = sin(angleX);
@@ -42,7 +41,7 @@ float rand(vec2 co) {
 
 void main()
 {
-    FragPos = vec3(vec4(aPos.x + offsets[gl_InstanceID].x, aPos.y + offsets[gl_InstanceID].y, aPos.z + offsets[gl_InstanceID].z, 1.0));
+    FragPos = vec3(vec4(aPos.x, aPos.y, aPos.z, 1.0));
     //mat4 translation = mat4(1.0, 0.0, 0.0, -1000.0f,
           //      0.0, 1.0, 0.0, 0.0,
         //        0.0, 0.0, 1.0, -1000.0f,

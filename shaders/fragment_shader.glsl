@@ -35,8 +35,6 @@ struct Material {
     float     shininess;
 };  
   
-uniform vec4 timeOffsetColor;
-uniform float mixAmount;
 uniform vec3 viewPos;
 uniform int width;
 uniform int height;
@@ -102,15 +100,20 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
 
 vec3 getNormal() {
-    vec2 pos = vec2(int(TexCoords.x * width), int(TexCoords.y * height));
-    vec3 bottomLeft = vec3(FragPos.x, texture(heightTexture, vec2(FragPos.x / width, FragPos.z / height)).r, FragPos.z);
-    vec3 bottomRight = vec3(FragPos.x + 1, texture(heightTexture, vec2(FragPos.x + 1 / width, FragPos.z / height)).r, FragPos.z);
-    vec3 topLeft = vec3(FragPos.x, texture(heightTexture, vec2(FragPos.x / width, FragPos.z + 1 / height)).r, FragPos.z + 1);
-    vec3 topRight = vec3(FragPos.x + 1, texture(heightTexture, vec2(FragPos.x + 1 / height, FragPos.z + 1 / height)).r, FragPos.z + 1);
+    vec2 pos = vec2(int(FragPos.x), int(FragPos.z));
+    float bottomLeftNoise = texture(heightTexture, vec2(pos.x / width, pos.y / height)).r;
+    float bottomRightNoise = texture(heightTexture, vec2(pos.x + 1 / width, pos.y / height)).r;
+    float topLeftNoise = texture(heightTexture, vec2(pos.x / width, pos.y + 1 / height)).r;
+    float topRightNoise = texture(heightTexture, vec2(pos.x + 1 / width, pos.y + 1 / height)).r;
 
+    vec3 bottomLeft = vec3(pos.x, bottomLeftNoise, pos.y);
+    vec3 bottomRight = vec3(pos.x + 1, bottomRightNoise, pos.y);
+    vec3 topLeft = vec3(pos.x, topLeftNoise, pos.y + 1);
+    vec3 topRight = vec3(pos.x + 1, topRightNoise, pos.y + 1);
+    vec3 U, V;
 
-    vec3 U = topLeft - bottomLeft;
-	vec3 V = topRight - bottomLeft;
+    U = topLeft - bottomLeft;
+    V = topRight - bottomLeft;
 
 	vec3 normal;
 	normal.x = (U.y * V.z) - (U.z * V.y);
@@ -122,10 +125,10 @@ vec3 getNormal() {
 void main() {
     
     vec3 norm = getNormal();
-
+    // norm = vec3(0.0, 1.0, 0.0);
     vec3 viewDir = normalize(viewPos - FragPos);
     // phase 1: Directional lighting
-    vec3 result = CalcDirLight(dirLight, norm, viewDir);
+    vec3 result;// = CalcDirLight(dirLight, norm, viewDir);
     // phase 2: Point lights
     for(int i = 0; i < pointLightCount; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    

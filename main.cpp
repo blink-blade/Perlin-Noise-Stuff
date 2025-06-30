@@ -186,6 +186,10 @@ void makeFaces() {
             // tB = (float)y / height;
             // tR = ((float)x + 1) / width;
             // tT = ((float)y + 1) / height;
+            tL = 0;
+            tB = 0;
+            tR = 1;
+            tT = 1;
             normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
             currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tB, type);
             currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
@@ -265,18 +269,18 @@ Light lights[1000];
     lightingShader.setInt("heightTexture", 2);
     lightingShader.setInt("width", width);
     lightingShader.setInt("height", height);
-    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/spritesheet.png").c_str());
-    unsigned int specularMap = loadTexture(FileSystem::getPath("images/spritesheetspecularmap.png").c_str());
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
+    unsigned int specularMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
     srand(time(0));
     Light light;
-    // for (int i = 0; i < 1000; i++) {
-    //     float r = round(sin(rand()) * 0.5 + 0.5);
-    //     float b = round(sin(rand()) * 0.5 + 0.5);
-    //     float g = round(sin(rand()) * 0.5 + 0.5);
-    //     light = Light(2.0, glm::vec3(sin(rand()) * 400, 30, sin(rand()) * 400), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 25, lightingShader);
-    //     light.init(lightingShader);
-    //     lights[light.ID] = light;
-    // }
+    for (int i = 0; i < 1; i++) {
+        float r = round(sin(rand()) * 0.5 + 0.5);
+        float b = round(sin(rand()) * 0.5 + 0.5);
+        float g = round(sin(rand()) * 0.5 + 0.5);
+        light = Light(2.0, glm::vec3(sin(rand()) * 400 + 500, 30, sin(rand()) * 400 + 500), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 2500, lightingShader);
+        light.init(lightingShader);
+        lights[light.ID] = light;
+    }
 
     const char* text = to_string(1000 / deltaTime / 1000).c_str();
     int jeffy = 0;
@@ -372,7 +376,9 @@ Light lights[1000];
         lightingShader.setVec3("dirLight.ambient", 0.05f * 2, 0.05f * 2, 0.05f * 2);
         lightingShader.setVec3("dirLight.diffuse", 0.4f * 2, 0.4f * 2, 0.4f * 2);
         lightingShader.setVec3("dirLight.specular", 0.5f * 2, 0.5f * 2, 0.5f * 2);
-
+        for (int i = 0; i < pointLightCount; i++) {
+            lights[i].setPosition(glm::vec3(lights[i].position.x + sin(timeValue), lights[i].position.y, lights[i].position.z + cos(timeValue)), lightingShader);
+        }
         float greenValue = sin(timeValue);
         lightingShader.setFloat("timeOffsetColor", sin(timeValue));
         int viewLoc = glGetUniformLocation(lightingShader.ID, "view");
