@@ -39,7 +39,7 @@ uniform vec3 viewPos;
 uniform int width;
 uniform int height;
 uniform Material material;
-uniform sampler2D heightTexture;
+uniform sampler2D normalMap;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
@@ -48,16 +48,16 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float shininess = 0.0;
-    if (type == 0.0) {
-        shininess = 32.0;
-    }
-    else if (type == 1.0) {
-        shininess = 5.0;
-    }
-    else {
-        shininess = 2.0;
-    }
+    float shininess = 32.0;
+    // if (type == 0.0) {
+    //     shininess = 32.0;
+    // }
+    // else if (type == 1.0) {
+    //     shininess = 5.0;
+    // }
+    // else {
+    //     shininess = 2.0;
+    // }
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     // combine results
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));
@@ -73,16 +73,16 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float shininess = 0.0;
-    if (type == 0.0) {
-        shininess = 32.0;
-    }
-    else if (type == 1.0) {
-        shininess = 5.0;
-    }
-    else {
-        shininess = 2.0;
-    }
+    float shininess = 32.0;
+    // if (type == 0.0) {
+    //     shininess = 32.0;
+    // }
+    // else if (type == 1.0) {
+    //     shininess = 5.0;
+    // }
+    // else {
+    //     shininess = 2.0;
+    // }
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     // attenuation
     float distance    = length(light.position - fragPos);
@@ -98,33 +98,15 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     return (ambient + diffuse + specular);
 } 
 
-
-vec3 getNormal() {
-    vec2 pos = vec2(int(FragPos.x), int(FragPos.z));
-    float bottomLeftNoise = texture(heightTexture, vec2(pos.x / width, pos.y / height)).r;
-    float bottomRightNoise = texture(heightTexture, vec2(pos.x + 1 / width, pos.y / height)).r;
-    float topLeftNoise = texture(heightTexture, vec2(pos.x / width, pos.y + 1 / height)).r;
-    float topRightNoise = texture(heightTexture, vec2(pos.x + 1 / width, pos.y + 1 / height)).r;
-
-    vec3 bottomLeft = vec3(pos.x, bottomLeftNoise, pos.y);
-    vec3 bottomRight = vec3(pos.x + 1, bottomRightNoise, pos.y);
-    vec3 topLeft = vec3(pos.x, topLeftNoise, pos.y + 1);
-    vec3 topRight = vec3(pos.x + 1, topRightNoise, pos.y + 1);
-    vec3 U, V;
-
-    U = topLeft - bottomLeft;
-    V = topRight - bottomLeft;
-
-	vec3 normal;
-	normal.x = (U.y * V.z) - (U.z * V.y);
-	normal.y = (U.z * V.x) - (U.x * V.z);
-	normal.z = (U.x * V.y) - (U.y * V.x);
-
-    return normalize(normal);
-}
 void main() {
+    vec3 norm;
+    if (FragPos.x - int(FragPos.x) < FragPos.z - int(FragPos.z)) {
+        norm = vec3(texture(normalMap, vec2(FragPos.x / width, FragPos.z / height)));
+    }
+    else {
+        norm = vec3(texture(normalMap, vec2(FragPos.x / width, FragPos.z / height)));
+    }
     
-    vec3 norm = getNormal();
     // norm = vec3(0.0, 1.0, 0.0);
     vec3 viewDir = normalize(viewPos - FragPos);
     // phase 1: Directional lighting

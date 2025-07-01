@@ -9,7 +9,6 @@ out vec2 TexCoords;
 uniform float time;
 uniform mat4 view;
 uniform mat4 projection;
-uniform vec3 offsets[100];
 out vec3 FragPos;  
 out vec3 Normal;
 out float type;

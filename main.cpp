@@ -81,6 +81,7 @@ float cubeVertices[216]= {
     -0.5f,  0.5f,  0.5f, 
     -0.5f,  0.5f, -0.5f
 };
+std::vector<glm::vec3> normals(width * 2 * height);
 // float vertices[] = {
 //     -0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
@@ -88,7 +89,7 @@ float cubeVertices[216]= {
 // };
 double **noiseMap;
 
-int setVertex(int index, float x, float y, float z, float r, float b, float g, float nVX, float nVY, float nVZ, float tX, float tY, int type) {
+int setVertex(int index, float x, float y, float z, float r, float g, float b, float tX, float tY, int type) {
     int newIndex = index;
     vertices[newIndex] = x;
     newIndex += 1;
@@ -102,12 +103,6 @@ int setVertex(int index, float x, float y, float z, float r, float b, float g, f
     newIndex += 1;
     vertices[newIndex] = b;
     newIndex += 1;
-    // vertices[newIndex] = nVX;
-    // newIndex += 1;
-    // vertices[newIndex] = nVY;
-    // newIndex += 1;
-    // vertices[newIndex] = nVZ;
-    // newIndex += 1;
     vertices[newIndex] = tX;
     newIndex += 1;
     vertices[newIndex] = tY;
@@ -142,7 +137,7 @@ void makeFaces() {
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
-    noiseMap = generateNoiseMap(width + 1, width + 1, 8, 0.3, 6, 1, 0, 0, 0, 0, 0, 123);
+    noiseMap = generateNoiseMap(width + 1, width + 1, 3, 1, 6, 1, 0, 0, 0, 0, 0, 123);
 
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
@@ -186,21 +181,38 @@ void makeFaces() {
             // tB = (float)y / height;
             // tR = ((float)x + 1) / width;
             // tT = ((float)y + 1) / height;
-            tL = 0;
-            tB = 0;
-            tR = 1;
-            tT = 1;
-            normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tB, type);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
-            currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tT, type);
-            normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, normal[0], normal[1], normal[2], tL, tB, type);
-            currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tB, type);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, normal[0], normal[1], normal[2], tR, tT, type);
+            // tL = 0;
+            // tB = 0;
+            // tR = 1;
+            // tT = 1;
+            // normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
+            // normals[x + width*y] = normal;
+            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, tL, tB, type);
+            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, tR, tT, type);
+            currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, tL, tT, type);
+            // normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
+            // normals[x + width*y] = normal;
+            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, tL, tB, type);
+            currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, tR, tB, type);
+            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, tR, tT, type);
         }   
     }
-    
+    for (int x = 0; x < width * 2; x++) {
+        for (int y = 0; y < height; y++) {
+            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
+            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
+            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
+            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
+            if (x % 2 == 0) {
+                normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
+                normals[x + (width * 2)*y] = normal;
+            }
+            else {
+                normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
+                normals[x + (width * 2)*y] = normal;
+            }
+        }   
+    }
     // glm::vec3 av = glm::vec3(-0.5f, -0.5f, -0.5f);
     // glm::vec3 bv = glm::vec3(0.5f, -0.5f, -0.5f);
     // glm::vec3 cv = glm::vec3(0.5f, 0.5f, -0.5f);
@@ -266,18 +278,21 @@ Light lights[1000];
 // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
-    lightingShader.setInt("heightTexture", 2);
+    lightingShader.setInt("normalMap", 2);
     lightingShader.setInt("width", width);
     lightingShader.setInt("height", height);
-    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
-    unsigned int specularMap = loadTexture(FileSystem::getPath("images/white.png").c_str());
+    unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/spritesheet.png").c_str());
+    unsigned int specularMap = loadTexture(FileSystem::getPath("images/spritesheetspecularmap.png").c_str());
     srand(time(0));
     Light light;
     for (int i = 0; i < 1; i++) {
-        float r = round(sin(rand()) * 0.5 + 0.5);
-        float b = round(sin(rand()) * 0.5 + 0.5);
-        float g = round(sin(rand()) * 0.5 + 0.5);
-        light = Light(2.0, glm::vec3(sin(rand()) * 400 + 500, 30, sin(rand()) * 400 + 500), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 2500, lightingShader);
+        // float r = round(sin(rand()) * 0.5 + 0.5);
+        // float g = round(sin(rand()) * 0.5 + 0.5);
+        // float b = round(sin(rand()) * 0.5 + 0.5);
+        float r = 255 / 255;
+        float g = 204 / 255;
+        float b = 51 / 255;
+        light = Light(2.0, glm::vec3(500, 30, 500), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 1000, lightingShader);
         light.init(lightingShader);
         lights[light.ID] = light;
     }
@@ -285,26 +300,15 @@ Light lights[1000];
     const char* text = to_string(1000 / deltaTime / 1000).c_str();
     int jeffy = 0;
     float deltaTimeList[50];
-    for (int x = 0; x < 10; x++) {
-        for (int z = 0; z < 10; z++) {
-            translations[x + 10*z].x = x * 1000;
-            translations[x + 10*z].z = z * 1000;
-        }
-    }
-    for(unsigned int i = 0; i < 100; i++) {
-        lightingShader.setVec3(("offsets[" + std::to_string(i) + "]"), translations[i].x, translations[i].y, translations[i].z);
-    }  
 
-    vector<float> flatData(width * height);
-    for (int y = 0; y < height; ++y)
-        for (int x = 0; x < width; ++x)
-            flatData[y * width + x] = noiseMap[y][x];  // or float**[y][x]
+
+    
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     // Upload the float data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, flatData.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width * 2, height, 0, GL_RGB, GL_FLOAT, normals.data());
 
     // Set texture filtering and wrapping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // or GL_LINEAR
@@ -391,8 +395,8 @@ Light lights[1000];
 
         // draw the object
         glBindVertexArray(VAO);
-        // glDrawArrays(GL_TRIANGLES, 0, 72000000 / 6);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
+        glDrawArrays(GL_TRIANGLES, 0, 72000000 / 6);
+        // glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 
         // also draw the lamp object
         lightCubeShader.use();
