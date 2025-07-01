@@ -199,10 +199,10 @@ void makeFaces() {
     }
     for (int x = 0; x < width * 2; x++) {
         for (int y = 0; y < height; y++) {
-            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
-            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
-            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
-            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
+            bottomLeft = glm::vec3(x / 2, noiseMap[y][x / 2] * 45, y);
+            bottomRight = glm::vec3(x / 2 + 1, noiseMap[y][x / 2 + 1] * 45, y);
+            topLeft = glm::vec3(x / 2, noiseMap[y + 1][x / 2] * 45, y + 1);
+            topRight = glm::vec3(x / 2 + 1, noiseMap[y + 1][x / 2 + 1] * 45, y + 1);
             if (x % 2 == 0) {
                 normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
                 normals[x + (width * 2)*y] = normal;
@@ -311,8 +311,8 @@ Light lights[1000];
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width * 2, height, 0, GL_RGB, GL_FLOAT, normals.data());
 
     // Set texture filtering and wrapping
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // or GL_LINEAR
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // or GL_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // or GL_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // or GL_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
