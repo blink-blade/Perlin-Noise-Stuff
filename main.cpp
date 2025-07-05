@@ -174,18 +174,21 @@ Light lights[1000];
 
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
-        chunks.push_back(vector<Chunk>());
-    chunks.push_back(vector<Chunk>());
-    chunks.push_back(vector<Chunk>());
-    chunks.push_back(vector<Chunk>());
-    chunks[0].push_back(Chunk(glm::vec2(0, 0)));
     // Rendering stuff.
     glGenVertexArrays(1, &ChunkVAO);
     glGenBuffers(1, &ChunkVBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(ChunkVAO);
     glBindBuffer(GL_ARRAY_BUFFER, ChunkVBO);
-    glBufferData(GL_ARRAY_BUFFER, chunks[0][0].vertices.size() * sizeof(float), chunks[0][0].vertices.data(), GL_STATIC_DRAW);
+    for (int y = 0; y < height / chunkSize; y++) {
+        chunks.push_back(vector<Chunk>());
+        for (int x = 0; x < width / chunkSize; x++) {
+            chunks[y].push_back(Chunk(glm::vec2(x, y)));
+            // glBufferData(GL_ARRAY_BUFFER, chunks[y][x].vertices.size() * sizeof(float), chunks[y][x].vertices.data(), GL_STATIC_DRAW);
+        }   
+    }
+    
+
 
     // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
 
@@ -288,7 +291,15 @@ Light lights[1000];
 
         // draw the object
         glBindVertexArray(ChunkVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 72000000 / 6);
+        glBindBuffer(GL_ARRAY_BUFFER, ChunkVBO);
+        // cout << "hi";
+        for (int y = 0; y < height / chunkSize; y++) {
+            for (int x = 0; x < width / chunkSize; x++) {
+                glBufferData(GL_ARRAY_BUFFER, chunks[y][x].vertices.size() * sizeof(float), chunks[y][x].vertices.data(), GL_STATIC_DRAW);
+                glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size());
+            }   
+        }
+        
         // glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 
         // also draw the lamp object

@@ -51,7 +51,7 @@ float interpolate(float a0, float a1, float w) {
  
 // Sample Perlin noise at coordinates x, y
 float noise(float x, float y) {
-
+    // cout << "start" << endl;
     // Get the corner positions, x0 is left, x1 is left
     int x0 = (int)x; 
     int y0 = (int)y;
@@ -61,6 +61,7 @@ float noise(float x, float y) {
     // Compute Interpolation weights
     float sx = x - (float)x0;
     float sy = y - (float)y0;
+    // cout << x0 << " " << y0 << endl;
     // cout << sx << ", " << sy << "\n";
     struct corner tlCorner = cornerGrid[y0][x0];
     struct corner blCorner = cornerGrid[y1][x0];
@@ -86,7 +87,6 @@ float noise(float x, float y) {
     // Interpolation.
     float tlTrInterpolation = interpolate(tlDotProduct, trDotProduct, sx);
     float blBrInterpolation = interpolate(blDotProduct, brDotProduct, sx);
-    
     return interpolate(tlTrInterpolation, blBrInterpolation, sy);
 }
 
@@ -99,7 +99,7 @@ int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float freq
         maxPos = (int)((float)maxW * freq);
         freq *= 2;
     }
-    return maxPos + 2;
+    return maxPos + 100;
 }
 
 void makeCorners(int noiseWidth, int noiseHeight, int layerAmount, float frequency) {
@@ -158,27 +158,28 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
             // printf("%f\n", noiseMap[y][x]);
             // continue;
             float amp = 1;
-            val = 0;
-            freq = frequency;
-            for (int i = 0; i < layerAmount; i++) {
-                val += noise((float)x * freq, (float)y * freq) * amp;
+            // val = 0;
+            // freq = frequency;
+            val += noise((float)x * frequency, (float)y * frequency) * amp;
+            // for (int i = 0; i < layerAmount; i++) {
+            //     val += noise((float)x * freq, (float)y * freq) * amp;
 
-                freq *= 2;
-                amp /= 2;
-            }
+            //     freq *= 2;
+            //     amp /= 2;
+            // }
             
-            if (islandMode == 1) {
-                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
-                val = fabs(val) - (distance_to_center / divide_amount);
-            }
-            else {
-                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
-                val -= (distance_to_center / divide_amount);
-            }
+            // if (islandMode == 1) {
+            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+            //     distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
+            //     val = fabs(val) - (distance_to_center / divide_amount);
+            // }
+            // else {
+            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+            //     distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
+            //     val -= (distance_to_center / divide_amount);
+            // }
             
-            val += offset;
+            // val += offset;
 
             noiseMap[y - noiseY].push_back(val);
         }
