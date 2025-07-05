@@ -5,5 +5,6 @@
 #include <string.h>
 #include <stddef.h>
 #include "helpers.h"
+#include <vector>
 
-extern double** generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, double frequency, double distanceEffect, int islandMode, double distanceCutOffOffsetX, double distanceCutOffOffsetY, double offset, int landOnly, int distanceCutOff, unsigned int newSeed);
+extern vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, float frequency, float distanceEffect, int islandMode, int noiseX, int noiseY, float distanceCutOffOffsetX, float distanceCutOffOffsetY, float offset, int landOnly, int distanceCutOff, unsigned int newSeed);

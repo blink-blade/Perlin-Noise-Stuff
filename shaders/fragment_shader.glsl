@@ -100,19 +100,14 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
 void main() {
     vec3 norm;
-    if (FragPos.x - int(FragPos.x) < FragPos.z - int(FragPos.z)) {
-        norm = vec3(texture(normalMap, vec2(FragPos.x / width, FragPos.z / height)));
-    }
-    else {
-        norm = vec3(texture(normalMap, vec2(FragPos.x / width, FragPos.z / height)));
-    }
+    norm = vec3(texture(normalMap, vec2(FragPos.x / width, FragPos.z / height)));
     
     // norm = vec3(0.0, 1.0, 0.0);
     vec3 viewDir = normalize(viewPos - FragPos);
     // phase 1: Directional lighting
-    vec3 result;// = CalcDirLight(dirLight, norm, viewDir);
+    vec3 result = CalcDirLight(dirLight, norm, viewDir);
     // phase 2: Point lights
     for(int i = 0; i < pointLightCount; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }

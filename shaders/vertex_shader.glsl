@@ -1,8 +1,7 @@
 #version 460 core
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
-layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
-layout (location = 2) in vec2 aTexCoords; 
-layout (location = 3) in float aType; 
+layout (location = 1) in vec2 aTexCoords; 
+layout (location = 2) in float aType; 
 
 out vec3 tileColor; // output a color to the fragment shader
 out vec2 TexCoords;
@@ -51,7 +50,6 @@ void main()
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
-    tileColor = aColor;
     TexCoords = aTexCoords;
     type = aType;
     gl_Position = projection * view * vec4(FragPos.x, FragPos.y, FragPos.z, 1.0);

@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <string>
-#include "stb_image.h"
+#include "chunk.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -16,9 +16,12 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 #include "shader.h"
-
+#include "stb_image.h"
 using namespace std;
+int chunkSize = 32;
+unsigned int ChunkVBO, ChunkVAO;
 
 // x, y, z, fov,
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);  

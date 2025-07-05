@@ -1,3 +1,5 @@
+#include "chunk.h"
+#include "glm/detail/type_vec.hpp"
 #include "stdint.h"
 #include "glad.h" 
 #include "khrplatform.h"
@@ -28,7 +30,8 @@ unsigned int shaderProgram;
 
 const char *vertexShaderSource;
 const char *fragmentShaderSource;
-
+// vector<vector<Chunk>> chunks(100, vector<Chunk>());
+vector<vector<Chunk>> chunks;
 // float vertices[] = {
 //     // positions          // colors           // texture coords
 //      0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  
@@ -81,48 +84,12 @@ float cubeVertices[216]= {
     -0.5f,  0.5f,  0.5f, 
     -0.5f,  0.5f, -0.5f
 };
-std::vector<glm::vec3> normals(width * 2 * height);
+std::vector<glm::vec3> normals(width * height);
 // float vertices[] = {
 //     -0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 1.0f
 // };
-double **noiseMap;
-
-int setVertex(int index, float x, float y, float z, float r, float g, float b, float tX, float tY, int type) {
-    int newIndex = index;
-    vertices[newIndex] = x;
-    newIndex += 1;
-    vertices[newIndex] = y;
-    newIndex += 1;
-    vertices[newIndex] = z;
-    newIndex += 1;
-    vertices[newIndex] = r;
-    newIndex += 1;
-    vertices[newIndex] = g;
-    newIndex += 1;
-    vertices[newIndex] = b;
-    newIndex += 1;
-    vertices[newIndex] = tX;
-    newIndex += 1;
-    vertices[newIndex] = tY;
-    newIndex += 1;
-    vertices[newIndex] = type;
-    return newIndex + 1;
-}
-
-glm::vec3 calculateSurfaceNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) {
-    // Need to fix this function, it will only work for half of the triangles. Depending on the orientation of the triangles, the subtractions need done differently.
-	glm::vec3 U = p3 - p1;
-	glm::vec3 V = p2 - p1;
-
-	glm::vec3 normal;
-	normal.x = (U.y * V.z) - (U.z * V.y);
-	normal.y = (U.z * V.x) - (U.x * V.z);
-	normal.z = (U.x * V.y) - (U.y * V.x);
-
-	return glm::normalize(normal);
-}
 
 int getIndexOfPoint(int x, int z) {
     return (x + width*z);
@@ -137,82 +104,7 @@ void makeFaces() {
     // 0.545474
     // 0.0541736
     float timeTakenToStart = glfwGetTime();
-    noiseMap = generateNoiseMap(width + 1, width + 1, 3, 1, 6, 1, 0, 0, 0, 0, 0, 123);
 
-    for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
-            bottomLeft = glm::vec3(x, noiseMap[y][x] * 45, y);
-            bottomRight = glm::vec3(x + 1, noiseMap[y][x + 1] * 45, y);
-            topLeft = glm::vec3(x, noiseMap[y + 1][x] * 45, y + 1);
-            topRight = glm::vec3(x + 1, noiseMap[y + 1][x + 1] * 45, y + 1);
-            if (noiseMap[y][x] < -0.7) {
-                type = 0.0;
-                tL = 0.0f / 1024.0f;
-                tB = 0.0f / 1024.0f;
-                tR = 16.0 / 1024.0f;
-                tT = 16.0 / 1024.0f;
-                // r = 39.0 / 255;
-                // b = 88.0 / 255;
-                // g = 123.0 / 255;
-            }
-            else if (noiseMap[y][x] < -0.55) {
-                type = 1.0;
-                tL = 16.0f / 1024.0f;
-                tB = 0.0f / 1024.0f;
-                tR = 32.0f / 1024.0f;
-                tT = 16.0f / 1024.0f;
-                // r = 177.0 / 255;
-                // b = 145.0 / 255;
-                // g = 88.0 / 255;
-            }
-            else {
-                type = 2.0;
-                tL = 32.0f / 1024.0f;
-                tB = 0.0f / 1024.0f;
-                tR = 48.0f / 1024.0f;
-                tT = 16.0f / 1024.0f;
-                // r = 93.0 / 255;
-                // b = 92.0 / 255;
-                // g = 45.0 / 255;
-            }
-            tR -= 0.001;
-            tT -= 0.001;
-            // tL = (float)x / width;
-            // tB = (float)y / height;
-            // tR = ((float)x + 1) / width;
-            // tT = ((float)y + 1) / height;
-            // tL = 0;
-            // tB = 0;
-            // tR = 1;
-            // tT = 1;
-            // normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
-            // normals[x + width*y] = normal;
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, tL, tB, type);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, tR, tT, type);
-            currentIndex = setVertex(currentIndex, topLeft[0], topLeft[1], topLeft[2], r, g, b, tL, tT, type);
-            // normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
-            // normals[x + width*y] = normal;
-            currentIndex = setVertex(currentIndex, bottomLeft[0], bottomLeft[1], bottomLeft[2], r, g, b, tL, tB, type);
-            currentIndex = setVertex(currentIndex, bottomRight[0], bottomRight[1], bottomRight[2], r, g, b, tR, tB, type);
-            currentIndex = setVertex(currentIndex, topRight[0], topRight[1], topRight[2], r, g, b, tR, tT, type);
-        }   
-    }
-    for (int x = 0; x < width * 2; x++) {
-        for (int y = 0; y < height; y++) {
-            bottomLeft = glm::vec3(x / 2, noiseMap[y][x / 2] * 45, y);
-            bottomRight = glm::vec3(x / 2 + 1, noiseMap[y][x / 2 + 1] * 45, y);
-            topLeft = glm::vec3(x / 2, noiseMap[y + 1][x / 2] * 45, y + 1);
-            topRight = glm::vec3(x / 2 + 1, noiseMap[y + 1][x / 2 + 1] * 45, y + 1);
-            if (x % 2 == 0) {
-                normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
-                normals[x + (width * 2)*y] = normal;
-            }
-            else {
-                normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
-                normals[x + (width * 2)*y] = normal;
-            }
-        }   
-    }
     // glm::vec3 av = glm::vec3(-0.5f, -0.5f, -0.5f);
     // glm::vec3 bv = glm::vec3(0.5f, -0.5f, -0.5f);
     // glm::vec3 cv = glm::vec3(0.5f, 0.5f, -0.5f);
@@ -235,33 +127,12 @@ int main()
     makeFaces();
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
-    // Rendering stuff.
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-
     // first, configure the cube's VAO (and VBO)
-    unsigned int cubeVAO;
+    unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &cubeVBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
     glBindVertexArray(cubeVAO);
@@ -301,18 +172,40 @@ Light lights[1000];
     int jeffy = 0;
     float deltaTimeList[50];
 
+    lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
+        chunks.push_back(vector<Chunk>());
+    chunks.push_back(vector<Chunk>());
+    chunks.push_back(vector<Chunk>());
+    chunks.push_back(vector<Chunk>());
+    chunks[0].push_back(Chunk(glm::vec2(0, 0)));
+    // Rendering stuff.
+    glGenVertexArrays(1, &ChunkVAO);
+    glGenBuffers(1, &ChunkVBO);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(ChunkVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, ChunkVBO);
+    glBufferData(GL_ARRAY_BUFFER, chunks[0][0].vertices.size() * sizeof(float), chunks[0][0].vertices.data(), GL_STATIC_DRAW);
+
+    // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
     
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     // Upload the float data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width * 2, height, 0, GL_RGB, GL_FLOAT, normals.data());
-
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, normals.data());
+    GLint max_texture_size;
     // Set texture filtering and wrapping
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // or GL_LINEAR
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // or GL_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // or GL_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // or GL_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -394,7 +287,7 @@ Light lights[1000];
 
 
         // draw the object
-        glBindVertexArray(VAO);
+        glBindVertexArray(ChunkVAO);
         glDrawArrays(GL_TRIANGLES, 0, 72000000 / 6);
         // glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 
@@ -412,8 +305,8 @@ Light lights[1000];
         glfwPollEvents();    
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &ChunkVAO);
+    glDeleteBuffers(1, &ChunkVBO);
     glDeleteProgram(shaderProgram);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);     

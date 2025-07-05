@@ -1,4 +1,5 @@
 #include <cstddef>
+
 #include <string>
 #include "stdint.h"
 #include "inttypes.h"
@@ -12,7 +13,6 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "stb_image.h"
 #include "shader.h"
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -35,6 +35,8 @@ extern int pointLightCount;
 extern void processInput(GLFWwindow *window);
 extern void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 extern void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+extern glm::vec3 calculateSurfaceNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
+
 extern unsigned int loadTexture(char const * path);
 extern int glfwInits();
 extern int width;
@@ -51,6 +53,9 @@ extern glm::vec3 cameraUp;
 extern glm::vec3 cameraFront;
 extern glm::vec3 cameraUp;
 extern float fov;
+extern int chunkSize;
+extern unsigned int ChunkVBO, ChunkVAO;
+
 extern float cameraSpeed;
 extern float deltaTime;	// Time between current frame and last frame
 extern float lastFrame; // Time of last frame
