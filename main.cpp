@@ -189,7 +189,6 @@ Light lights[1000];
     }
     
 
-
     // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
