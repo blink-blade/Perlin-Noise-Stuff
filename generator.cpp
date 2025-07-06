@@ -51,8 +51,63 @@ float interpolate(float a0, float a1, float w) {
     return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
 }
  
+struct corner makeCorner(int x, int y) {
+    struct corner corner;
+    corner.x = x;
+    corner.y = y;
+    corner.gradientVec = randomGradient(x, y);
+    return corner;
+}
+
+
+
+    // // Get the corner positions, x0 is left, x1 is left
+    // int x0 = (int)x; 
+    // int y0 = (int)y;
+    // int x1 = x0 + 1;
+    // int y1 = y0 + 1;
+
+    // // Compute Interpolation weights
+    // double sx = x - (double)x0;
+    // double sy = y - (double)y0;
+
+    // struct corner tlCorner;
+    // struct corner blCorner;
+    // struct corner trCorner;
+    // struct corner brCorner;
+    // tlCorner.x = x0, tlCorner.y = y0;
+    // blCorner.x = x0, blCorner.y = y1;
+    // trCorner.x = x1, trCorner.y = y0;
+    // brCorner.x = x1, brCorner.y = y1;
+    // tlCorner.gradientVec = randomGradient(tlCorner.x, tlCorner.y);
+    // blCorner.gradientVec = randomGradient(blCorner.x, blCorner.y);
+    // trCorner.gradientVec = randomGradient(trCorner.x, trCorner.y);
+    // brCorner.gradientVec = randomGradient(brCorner.x, brCorner.y);
+
+    // // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
+    // struct vec2d tlDistanceVector;
+    // struct vec2d blDistanceVector;
+    // struct vec2d trDistanceVector;
+    // struct vec2d brDistanceVector;
+
+    // tlDistanceVector.x = x - tlCorner.x, tlDistanceVector.y = y - tlCorner.y; 
+    // blDistanceVector.x = x - blCorner.x, blDistanceVector.y = y - blCorner.y; 
+    // trDistanceVector.x = x - trCorner.x, trDistanceVector.y = y - trCorner.y; 
+    // brDistanceVector.x = x - brCorner.x, brDistanceVector.y = y - brCorner.y; 
+
+    // // Get dot product from the distance vectors and the gradient vectors.
+    // double tlDotProduct = (tlDistanceVector.x * tlCorner.gradientVec.x) + (tlDistanceVector.y * tlCorner.gradientVec.y);
+    // double blDotProduct = (blDistanceVector.x * blCorner.gradientVec.x) + (blDistanceVector.y * blCorner.gradientVec.y);
+    // double trDotProduct = (trDistanceVector.x * trCorner.gradientVec.x) + (trDistanceVector.y * trCorner.gradientVec.y);
+    // double brDotProduct = (brDistanceVector.x * brCorner.gradientVec.x) + (brDistanceVector.y * brCorner.gradientVec.y);
+
+    // // Interpolation.
+    // double tlTrInterpolation = interpolate(tlDotProduct, trDotProduct, sx);
+    // double blBrInterpolation = interpolate(blDotProduct, brDotProduct, sx);
+    // return interpolate(tlTrInterpolation, blBrInterpolation, sy);
+
 // Sample Perlin noise at coordinates x, y
-float noise(float x, float y, int noiseX, int noiseY) {
+float noise(float x, float y) {
     // cout << "start" << endl;
     // Get the corner positions, x0 is left, x1 is left
     int x0 = (int)x; 
@@ -63,22 +118,24 @@ float noise(float x, float y, int noiseX, int noiseY) {
     // Compute Interpolation weights
     float sx = x - (float)x0;
     float sy = y - (float)y0;
-    x += noiseX;
-    y += noiseY;
-    cout << x0 << " " << y0 << endl;
+
     // cout << sx << ", " << sy << "\n";
     if (cornerGrid.count(make_pair(x0,y0)) == 0) {
-        // cout << "hey" << endl;
+        cornerGrid[make_pair(x0,y0)] = makeCorner(x0, y0);
     }
-    // struct corner tlCorner = cornerGrid[make_pair(x0,y0)];
-    // struct corner blCorner = cornerGrid[make_pair(x0,y1)];
-    // struct corner trCorner = cornerGrid[make_pair(x1,y0)];
-    // struct corner brCorner = cornerGrid[make_pair(x1,y1)];
-    struct corner tlCorner;
-    struct corner blCorner;
-    struct corner trCorner;
-    struct corner brCorner;
-    
+    if (cornerGrid.count(make_pair(x0,y1)) == 0) {
+        cornerGrid[make_pair(x0,y1)] = makeCorner(x0, y1);
+    }
+    if (cornerGrid.count(make_pair(x1,y0)) == 0) {
+        cornerGrid[make_pair(x1,y0)] = makeCorner(x1, y0);
+    }
+    if (cornerGrid.count(make_pair(x1,y1)) == 0) {
+        cornerGrid[make_pair(x1,y1)] = makeCorner(x1,y1);
+    }
+    struct corner tlCorner = cornerGrid[make_pair(x0,y0)];
+    struct corner blCorner = cornerGrid[make_pair(x0,y1)];
+    struct corner trCorner = cornerGrid[make_pair(x1,y0)];
+    struct corner brCorner = cornerGrid[make_pair(x1,y1)];
     // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
     struct vec2d tlDistanceVector;
     struct vec2d blDistanceVector;
@@ -173,7 +230,7 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
             val = 0;
             freq = frequency;
             for (int i = 0; i < 1; i++) {
-                val += noise((float)x * freq, (float)y * freq, noiseX, noiseY) * amp;
+                val += noise((float)x * freq, (float)y * freq) * amp;
 
                 freq *= 2;
                 amp /= 2;
