@@ -6,7 +6,6 @@
 #include <stddef.h>
 #include "helpers.h"
 #include <vector>
-#include <map>
 
 struct vec2d {
     float x;
@@ -21,10 +20,9 @@ struct corner {
 
 
 
-map<pair<int,int>, struct corner> cornerGrid;
-
 unsigned int seed = 100;
 float **mapNoiseMap;
+struct corner **cornerGrid;
 
 struct vec2d possibleGradientVectors[8];
 
@@ -51,111 +49,111 @@ float interpolate(float a0, float a1, float w) {
     return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
 }
  
-struct corner makeCorner(int x, int y) {
-    struct corner corner;
-    corner.x = x;
-    corner.y = y;
-    corner.gradientVec = randomGradient(x, y);
-    return corner;
-}
-
-
-
-    // // Get the corner positions, x0 is left, x1 is left
-    // int x0 = (int)x; 
-    // int y0 = (int)y;
-    // int x1 = x0 + 1;
-    // int y1 = y0 + 1;
-
-    // // Compute Interpolation weights
-    // double sx = x - (double)x0;
-    // double sy = y - (double)y0;
-
-    // struct corner tlCorner;
-    // struct corner blCorner;
-    // struct corner trCorner;
-    // struct corner brCorner;
-    // tlCorner.x = x0, tlCorner.y = y0;
-    // blCorner.x = x0, blCorner.y = y1;
-    // trCorner.x = x1, trCorner.y = y0;
-    // brCorner.x = x1, brCorner.y = y1;
-    // tlCorner.gradientVec = randomGradient(tlCorner.x, tlCorner.y);
-    // blCorner.gradientVec = randomGradient(blCorner.x, blCorner.y);
-    // trCorner.gradientVec = randomGradient(trCorner.x, trCorner.y);
-    // brCorner.gradientVec = randomGradient(brCorner.x, brCorner.y);
-
-    // // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
-    // struct vec2d tlDistanceVector;
-    // struct vec2d blDistanceVector;
-    // struct vec2d trDistanceVector;
-    // struct vec2d brDistanceVector;
-
-    // tlDistanceVector.x = x - tlCorner.x, tlDistanceVector.y = y - tlCorner.y; 
-    // blDistanceVector.x = x - blCorner.x, blDistanceVector.y = y - blCorner.y; 
-    // trDistanceVector.x = x - trCorner.x, trDistanceVector.y = y - trCorner.y; 
-    // brDistanceVector.x = x - brCorner.x, brDistanceVector.y = y - brCorner.y; 
-
-    // // Get dot product from the distance vectors and the gradient vectors.
-    // double tlDotProduct = (tlDistanceVector.x * tlCorner.gradientVec.x) + (tlDistanceVector.y * tlCorner.gradientVec.y);
-    // double blDotProduct = (blDistanceVector.x * blCorner.gradientVec.x) + (blDistanceVector.y * blCorner.gradientVec.y);
-    // double trDotProduct = (trDistanceVector.x * trCorner.gradientVec.x) + (trDistanceVector.y * trCorner.gradientVec.y);
-    // double brDotProduct = (brDistanceVector.x * brCorner.gradientVec.x) + (brDistanceVector.y * brCorner.gradientVec.y);
-
-    // // Interpolation.
-    // double tlTrInterpolation = interpolate(tlDotProduct, trDotProduct, sx);
-    // double blBrInterpolation = interpolate(blDotProduct, brDotProduct, sx);
-    // return interpolate(tlTrInterpolation, blBrInterpolation, sy);
-
 // Sample Perlin noise at coordinates x, y
 float noise(float x, float y) {
-    // cout << "start" << endl;
+
+
+
     // Get the corner positions, x0 is left, x1 is left
+
     int x0 = (int)x; 
+
     int y0 = (int)y;
+
     int x1 = x0 + 1;
+
     int y1 = y0 + 1;
 
+
+
     // Compute Interpolation weights
+
     float sx = x - (float)x0;
+
     float sy = y - (float)y0;
 
-    // cout << sx << ", " << sy << "\n";
-    if (cornerGrid.count(make_pair(x0,y0)) == 0) {
-        cornerGrid[make_pair(x0,y0)] = makeCorner(x0, y0);
-    }
-    if (cornerGrid.count(make_pair(x0,y1)) == 0) {
-        cornerGrid[make_pair(x0,y1)] = makeCorner(x0, y1);
-    }
-    if (cornerGrid.count(make_pair(x1,y0)) == 0) {
-        cornerGrid[make_pair(x1,y0)] = makeCorner(x1, y0);
-    }
-    if (cornerGrid.count(make_pair(x1,y1)) == 0) {
-        cornerGrid[make_pair(x1,y1)] = makeCorner(x1,y1);
-    }
-    struct corner tlCorner = cornerGrid[make_pair(x0,y0)];
-    struct corner blCorner = cornerGrid[make_pair(x0,y1)];
-    struct corner trCorner = cornerGrid[make_pair(x1,y0)];
-    struct corner brCorner = cornerGrid[make_pair(x1,y1)];
+
+
+
+
+    struct corner tlCorner;
+
+
+    struct corner blCorner;
+
+
+    struct corner trCorner;
+
+
+    struct corner brCorner;
+
+
+    tlCorner.x = x0, tlCorner.y = y0;
+
+
+    blCorner.x = x0, blCorner.y = y1;
+
+
+    trCorner.x = x1, trCorner.y = y0;
+
+
+    brCorner.x = x1, brCorner.y = y1;
+
+
+    tlCorner.gradientVec = randomGradient(tlCorner.x, tlCorner.y);
+
+
+    blCorner.gradientVec = randomGradient(blCorner.x, blCorner.y);
+
+
+    trCorner.gradientVec = randomGradient(trCorner.x, trCorner.y);
+
+
+    brCorner.gradientVec = randomGradient(brCorner.x, brCorner.y);
+
+
+
     // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
+
     struct vec2d tlDistanceVector;
+
     struct vec2d blDistanceVector;
+
     struct vec2d trDistanceVector;
+
     struct vec2d brDistanceVector;
+
     tlDistanceVector.x = x - tlCorner.x, tlDistanceVector.y = y - tlCorner.y; 
+
     blDistanceVector.x = x - blCorner.x, blDistanceVector.y = y - blCorner.y; 
+
     trDistanceVector.x = x - trCorner.x, trDistanceVector.y = y - trCorner.y; 
+
     brDistanceVector.x = x - brCorner.x, brDistanceVector.y = y - brCorner.y; 
 
+
+
     // Get dot product from the distance vectors and the gradient vectors.
+
     float tlDotProduct = (tlDistanceVector.x * tlCorner.gradientVec.x) + (tlDistanceVector.y * tlCorner.gradientVec.y);
+
     float blDotProduct = (blDistanceVector.x * blCorner.gradientVec.x) + (blDistanceVector.y * blCorner.gradientVec.y);
+
     float trDotProduct = (trDistanceVector.x * trCorner.gradientVec.x) + (trDistanceVector.y * trCorner.gradientVec.y);
+
     float brDotProduct = (brDistanceVector.x * brCorner.gradientVec.x) + (brDistanceVector.y * brCorner.gradientVec.y);
 
+
+
     // Interpolation.
+
     float tlTrInterpolation = interpolate(tlDotProduct, trDotProduct, sx);
+
     float blBrInterpolation = interpolate(blDotProduct, brDotProduct, sx);
+
+
     return interpolate(tlTrInterpolation, blBrInterpolation, sy);
+
 }
 
 int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float frequency) {
@@ -170,27 +168,27 @@ int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float freq
     return maxPos + 2;
 }
 
-// void makeCorners(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
-//     int max = getMaxCornerPos(noiseWidth, noiseHeight, layerAmount, frequency);
-//     struct corner corner;
+void makeCorners(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
+    int max = getMaxCornerPos(noiseWidth, noiseHeight, layerAmount, frequency);
+    struct corner corner;
 
-//     delete cornerGrid;
-//     // Allocate memory for the array.
-//     cornerGrid = new struct corner*[max];
+    delete cornerGrid;
+    // Allocate memory for the array.
+    cornerGrid = new struct corner*[max];
 
-//     for (int h = 0; h < max; h++) {
-//         cornerGrid[h] = new struct corner[max];
-//     }
+    for (int h = 0; h < max; h++) {
+        cornerGrid[h] = new struct corner[max];
+    }
     
-//     for (int x = 0; x < max; x++) {
-//         for (int y = 0; y < max; y++) {
-//             corner.x = x + noiseX / noiseWidth;
-//             corner.y = y + noiseY / noiseWidth;
-//             corner.gradientVec = randomGradient(x + noiseX / noiseWidth, y + noiseY / noiseWidth);
-//             cornerGrid[y][x] = corner;
-//         }
-//     }
-// }
+    for (int x = 0; x < max; x++) {
+        for (int y = 0; y < max; y++) {
+            corner.x = x + noiseX / noiseWidth;
+            corner.y = y + noiseY / noiseWidth;
+            corner.gradientVec = randomGradient(x + noiseX / noiseWidth, y + noiseY / noiseWidth);
+            cornerGrid[y][x] = corner;
+        }
+    }
+}
 
 vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, float frequency, float distanceEffect, int islandMode, int noiseX, int noiseY, float distanceCutOffOffsetX, float distanceCutOffOffsetY, float offset, int landOnly, int distanceCutOff, unsigned int newSeed) {
     int x, y, i;
@@ -229,7 +227,7 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
             float amp = 1;
             val = 0;
             freq = frequency;
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < layerAmount; i++) {
                 val += noise((float)x * freq, (float)y * freq) * amp;
 
                 freq *= 2;

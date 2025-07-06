@@ -62,7 +62,7 @@ public:
         //         heightMap[y].push_back(x + y);
         //     }
         // }
-        heightMap = generateNoiseMap(chunkSize + 1, chunkSize + 1, 1, 1, 6, 1, pos.x, pos.y, 0, 0, 0, 0, 0, 123);
+        heightMap = generateNoiseMap(chunkSize + 1, chunkSize + 1, 6, 1, 6, 1, pos.x, pos.y, 0, 0, 0, 0, 0, 123);
         // cout << heightMap[0].size();
         for (int y = 0; y < chunkSize; y++) {
             for (int x = 0; x < chunkSize; x++) {

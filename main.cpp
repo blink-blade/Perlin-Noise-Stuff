@@ -90,41 +90,11 @@ std::vector<glm::vec3> normals(width * height);
 //     0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 1.0f
 // };
-
-int getIndexOfPoint(int x, int z) {
-    return (x + width*z);
-}
-
-
-void makeFaces() {
-    int currentIndex, bottomLeftIndex, bottomRightIndex, topLeftIndex, topRightIndex;
-    glm::vec3 bottomLeft, bottomRight, topLeft, topRight, pos, normal;
-    float r = 1, g = 1, b = 1, tL, tB, tR, tT, type;
-    currentIndex = 0;
-    // 0.545474
-    // 0.0541736
-    float timeTakenToStart = glfwGetTime();
-
-    // glm::vec3 av = glm::vec3(-0.5f, -0.5f, -0.5f);
-    // glm::vec3 bv = glm::vec3(0.5f, -0.5f, -0.5f);
-    // glm::vec3 cv = glm::vec3(0.5f, 0.5f, -0.5f);
-
-    // cout << [0] << ", " << calculateSurfaceNormal(av, bv, cv)[1] << ", " << calculateSurfaceNormal(av, bv, cv)[2] << "\n";
-
-    // currentIndex = setVertex(0, -0.5f, -0.5f, -0.5f, r, g, b, 0, 0, 0);
-    // currentIndex = setVertex(currentIndex, 0.5f, -0.5f, -0.5f, r, g, b, 0, 0, 0);
-    // currentIndex = setVertex(currentIndex, 0.5f,  0.5f, -0.5f, r, g, b, 0, 0, 0);
-
-    
-    cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
-}
-
 int main()
 {
     glfwInits();
     Shader lightingShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
     Shader lightCubeShader("shaders/light_vertex_shader.glsl", "shaders/light_fragment_shader.glsl");
-    makeFaces();
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
     // first, configure the cube's VAO (and VBO)
@@ -180,6 +150,7 @@ Light lights[1000];
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(ChunkVAO);
     glBindBuffer(GL_ARRAY_BUFFER, ChunkVBO);
+    float timeTakenToStart = glfwGetTime();
     for (int y = 0; y < height / chunkSize; y++) {
         chunks.push_back(vector<Chunk>());
         for (int x = 0; x < width / chunkSize; x++) {
@@ -187,6 +158,7 @@ Light lights[1000];
             // glBufferData(GL_ARRAY_BUFFER, chunks[y][x].vertices.size() * sizeof(float), chunks[y][x].vertices.data(), GL_STATIC_DRAW);
         }   
     }
+    cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
     
 
     // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
