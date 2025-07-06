@@ -273,9 +273,9 @@ Light lights[1000];
         lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
         lightingShader.setFloat("material.shininess", 1.0f);
         lightingShader.setVec3("dirLight.direction", -0.0f, -1.0f, 0.0f);
-        lightingShader.setVec3("dirLight.ambient", 0.05f * 2, 0.05f * 2, 0.05f * 2);
-        lightingShader.setVec3("dirLight.diffuse", 0.4f * 2, 0.4f * 2, 0.4f * 2);
-        lightingShader.setVec3("dirLight.specular", 0.5f * 2, 0.5f * 2, 0.5f * 2);
+        lightingShader.setVec3("dirLight.ambient", 0.05f * 6, 0.05f * 6, 0.05f * 6);
+        lightingShader.setVec3("dirLight.diffuse", 0.4f * 6, 0.4f * 6, 0.4f * 6);
+        lightingShader.setVec3("dirLight.specular", 0.5f * 6, 0.5f * 6, 0.5f * 6);
         for (int i = 0; i < pointLightCount; i++) {
             lights[i].setPosition(glm::vec3(lights[i].position.x + sin(timeValue), lights[i].position.y, lights[i].position.z + cos(timeValue)), lightingShader);
         }

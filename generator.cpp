@@ -101,7 +101,7 @@ int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float freq
         maxPos = (int)((float)maxW * freq);
         freq *= 2;
     }
-    return maxPos + 5;
+    return maxPos + 1;
 }
 
 void makeCorners(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
@@ -135,10 +135,10 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
     float divide_amountX = 0;
     float divide_amountY = 0;
     if (distanceEffect) {
-        divide_amount = ((float)(noiseWidth / distanceEffect) + (float)(noiseHeight / distanceEffect));
+        divide_amount = ((float)(width / distanceEffect) + (float)(width / distanceEffect));
     }
     else {
-        divide_amount = ((float)(noiseWidth) + (float)(noiseHeight));
+        divide_amount = ((float)(width) + (float)(width));
     }
     
     float distance_to_center;
@@ -164,25 +164,25 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
             float amp = 1;
             val = 0;
             freq = frequency;
-            for (int i = 0; i < layerAmount; i++) {
+            for (int i = 0; i < 1; i++) {
                 val += noise((float)x * freq, (float)y * freq, noiseX, noiseY) * amp;
 
                 freq *= 2;
                 amp /= 2;
             }
             
-            if (islandMode == 1) {
-                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                distance_to_center = sqrt(pow((x + noiseX - width / 2), 2) + pow((y + noiseY - height / 2), 2));
-                val = fabs(val) - (distance_to_center / divide_amount);
-            }
-            else {
-                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                distance_to_center = sqrt(pow((x + noiseX - width / 2), 2) + pow((y + noiseY - height / 2), 2));
-                val -= (distance_to_center / divide_amount);
-            }
+            // if (islandMode == 1) {
+            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+            //     distance_to_center = sqrt(pow((x + noiseX - width / 2), 2) + pow((y + noiseY - height / 2), 2));
+            //     val = fabs(val) - (distance_to_center / divide_amount);
+            // }
+            // else {
+            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+            //     distance_to_center = sqrt(pow((x + noiseX - width / 2), 2) + pow((y + noiseY - height / 2), 2));
+            //     val -= (distance_to_center / divide_amount);
+            // }
             
-            val += offset;
+            // val += offset;
 
             noiseMap[y].push_back(val);
         }

@@ -109,5 +109,5 @@ void main() {
     // phase 2: Point lights
     for(int i = 0; i < pointLightCount; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    FragColor = vec4(result, 1.0);
 }
