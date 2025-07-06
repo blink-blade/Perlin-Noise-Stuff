@@ -66,10 +66,10 @@ public:
         // cout << heightMap[0].size();
         for (int y = 0; y < chunkSize; y++) {
             for (int x = 0; x < chunkSize; x++) {
-                bottomLeft = glm::vec3(x + pos.x, heightMap[y][x] * 45, y + pos.y);
-                bottomRight = glm::vec3(x + pos.x + 1, heightMap[y][x + 1] * 45, y + pos.y);
-                topLeft = glm::vec3(x + pos.x, heightMap[y + 1][x] * 45, y + pos.y + 1);
-                topRight = glm::vec3(x + pos.x + 1, heightMap[y + 1][x + 1] * 45, y + pos.y + 1);
+                bottomLeft = glm::vec3(x + pos.x, heightMap[y][x] * 15, y + pos.y);
+                bottomRight = glm::vec3(x + pos.x + 1, heightMap[y][x + 1] * 15, y + pos.y);
+                topLeft = glm::vec3(x + pos.x, heightMap[y + 1][x] * 15, y + pos.y + 1);
+                topRight = glm::vec3(x + pos.x + 1, heightMap[y + 1][x + 1] * 15, y + pos.y + 1);
                 if (heightMap[y][x] < -0.7) {
                     type = 0.0;
                     tL = 0.0f / 1024.0f;
