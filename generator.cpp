@@ -50,7 +50,7 @@ float interpolate(float a0, float a1, float w) {
 }
  
 // Sample Perlin noise at coordinates x, y
-float noise(float x, float y) {
+float noise(float x, float y, int noiseX, int noiseY) {
     // cout << "start" << endl;
     // Get the corner positions, x0 is left, x1 is left
     int x0 = (int)x; 
@@ -61,6 +61,8 @@ float noise(float x, float y) {
     // Compute Interpolation weights
     float sx = x - (float)x0;
     float sy = y - (float)y0;
+    x += noiseX;
+    y += noiseY;
     // cout << x0 << " " << y0 << endl;
     // cout << sx << ", " << sy << "\n";
     struct corner tlCorner = cornerGrid[y0][x0];
@@ -90,51 +92,35 @@ float noise(float x, float y) {
     return interpolate(tlTrInterpolation, blBrInterpolation, sy);
 }
 
-int getMinCornerPos(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
+int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float frequency) {
     // The max x or y value that a corner could be positioned at.
     float freq = frequency;
-    int minW = noiseX - 1;
-    int minPos;
-    for (int ii = 0; ii < layerAmount; ii++) {
-        minPos = (int)((float)minW * freq);
-        freq *= 2;
-    }
-    return minPos;
-}
-
-int getMaxCornerPos(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
-    // The max x or y value that a corner could be positioned at.
-    float freq = frequency;
-    int maxW = noiseX + noiseWidth - 1;
+    int maxW = noiseWidth - 1;
     int maxPos;
     for (int ii = 0; ii < layerAmount; ii++) {
         maxPos = (int)((float)maxW * freq);
         freq *= 2;
     }
-    return maxPos + 100;
+    return maxPos + 5;
 }
 
 void makeCorners(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
-
-    int min = getMinCornerPos(noiseWidth, noiseHeight, noiseX, noiseY, layerAmount, frequency);
-    int max = getMaxCornerPos(noiseWidth, noiseHeight, noiseX, noiseY, layerAmount, frequency);
+    int max = getMaxCornerPos(noiseWidth, noiseHeight, layerAmount, frequency);
     struct corner corner;
+
     delete cornerGrid;
     // Allocate memory for the array.
-
     cornerGrid = new struct corner*[max];
 
-    // This crashing when I change the 0 to min is a problem.
     for (int h = 0; h < max; h++) {
         cornerGrid[h] = new struct corner[max];
     }
-
-
-    for (int x = min; x < max; x++) {
-        for (int y = min; y < max; y++) {
-            corner.x = x;
-            corner.y = y;
-            corner.gradientVec = randomGradient(x, y);
+    // cout << max << endl;
+    for (int x = 0; x < max; x++) {
+        for (int y = 0; y < max; y++) {
+            corner.x = x + noiseX;
+            corner.y = y + noiseY;
+            corner.gradientVec = randomGradient(x + noiseX, y + noiseY);
             cornerGrid[y][x] = corner;
         }
     }
@@ -165,43 +151,42 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
     frequency /= 50;
     
     makeCorners(noiseWidth, noiseHeight, noiseX, noiseY, layerAmount, frequency);
-
-    for (int y = noiseY; y < noiseHeight + noiseY; y++)
+    
+    for (int y = 0; y < noiseHeight; y++)
     {
         noiseMap.push_back(vector<float>());
-        for (int x = noiseX; x < noiseWidth + noiseX; x++)
+        for (int x = 0; x < noiseWidth; x++)
         {
+            // cout << x << " " << y << endl;
             // noiseMap[y][x] = -x + y + 10;
             // printf("%f\n", noiseMap[y][x]);
             // continue;
             float amp = 1;
-            // val = 0;
-            // freq = frequency;
-            val += noise((float)x * frequency, (float)y * frequency) * amp;
-            // for (int i = 0; i < layerAmount; i++) {
-            //     val += noise((float)x * freq, (float)y * freq) * amp;
+            val = 0;
+            freq = frequency;
+            for (int i = 0; i < layerAmount; i++) {
+                val += noise((float)x * freq, (float)y * freq, noiseX, noiseY) * amp;
 
-            //     freq *= 2;
-            //     amp /= 2;
-            // }
+                freq *= 2;
+                amp /= 2;
+            }
             
-            // if (islandMode == 1) {
-            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-            //     distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
-            //     val = fabs(val) - (distance_to_center / divide_amount);
-            // }
-            // else {
-            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-            //     distance_to_center = sqrt(pow((x - noiseWidth / 2), 2) + pow((y - noiseHeight / 2), 2));
-            //     val -= (distance_to_center / divide_amount);
-            // }
+            if (islandMode == 1) {
+                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+                distance_to_center = sqrt(pow((x + noiseX - width / 2), 2) + pow((y + noiseY - height / 2), 2));
+                val = fabs(val) - (distance_to_center / divide_amount);
+            }
+            else {
+                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+                distance_to_center = sqrt(pow((x + noiseX - width / 2), 2) + pow((y + noiseY - height / 2), 2));
+                val -= (distance_to_center / divide_amount);
+            }
             
-            // val += offset;
+            val += offset;
 
-            noiseMap[y - noiseY].push_back(val);
+            noiseMap[y].push_back(val);
         }
     }
-
     return noiseMap;
 }
 
