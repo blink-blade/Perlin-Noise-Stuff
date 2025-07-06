@@ -90,10 +90,22 @@ float noise(float x, float y) {
     return interpolate(tlTrInterpolation, blBrInterpolation, sy);
 }
 
-int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float frequency) {
+int getMinCornerPos(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
     // The max x or y value that a corner could be positioned at.
     float freq = frequency;
-    int maxW = noiseWidth - 1;
+    int minW = noiseX - 1;
+    int minPos;
+    for (int ii = 0; ii < layerAmount; ii++) {
+        minPos = (int)((float)minW * freq);
+        freq *= 2;
+    }
+    return minPos;
+}
+
+int getMaxCornerPos(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
+    // The max x or y value that a corner could be positioned at.
+    float freq = frequency;
+    int maxW = noiseX + noiseWidth - 1;
     int maxPos;
     for (int ii = 0; ii < layerAmount; ii++) {
         maxPos = (int)((float)maxW * freq);
@@ -102,19 +114,24 @@ int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float freq
     return maxPos + 100;
 }
 
-void makeCorners(int noiseWidth, int noiseHeight, int layerAmount, float frequency) {
-    int max = getMaxCornerPos(noiseWidth, noiseHeight, layerAmount, frequency);
-    struct corner corner;
+void makeCorners(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
 
+    int min = getMinCornerPos(noiseWidth, noiseHeight, noiseX, noiseY, layerAmount, frequency);
+    int max = getMaxCornerPos(noiseWidth, noiseHeight, noiseX, noiseY, layerAmount, frequency);
+    struct corner corner;
+    delete cornerGrid;
     // Allocate memory for the array.
+
     cornerGrid = new struct corner*[max];
 
+    // This crashing when I change the 0 to min is a problem.
     for (int h = 0; h < max; h++) {
         cornerGrid[h] = new struct corner[max];
     }
 
-    for (int x = 0; x < max; x++) {
-        for (int y = 0; y < max; y++) {
+
+    for (int x = min; x < max; x++) {
+        for (int y = min; y < max; y++) {
             corner.x = x;
             corner.y = y;
             corner.gradientVec = randomGradient(x, y);
@@ -147,7 +164,7 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
 
     frequency /= 50;
     
-    makeCorners(noiseWidth, noiseHeight, layerAmount, frequency);
+    makeCorners(noiseWidth, noiseHeight, noiseX, noiseY, layerAmount, frequency);
 
     for (int y = noiseY; y < noiseHeight + noiseY; y++)
     {
@@ -184,6 +201,7 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
             noiseMap[y - noiseY].push_back(val);
         }
     }
+
     return noiseMap;
 }
 
