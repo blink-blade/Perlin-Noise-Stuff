@@ -20,7 +20,7 @@
 #include "shader.h"
 #include "stb_image.h"
 using namespace std;
-int chunkSize = 32;
+int chunkSize = 100;
 unsigned int ChunkVBO, ChunkVAO;
 
 // x, y, z, fov,
@@ -33,7 +33,7 @@ glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 int firstMouse;
 float cameraSpeed = 0.0f;
-float fov = 90.0f;
+float fov = 70.0f;
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 // -1 = down, 0 = none, 1 = up.
@@ -211,6 +211,8 @@ int glfwInits()
     glEnable(GL_DEPTH_TEST);  
 glEnable(GL_BLEND);
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);  
+    glCullFace(GL_FRONT);  
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback); 
     glfwSetScrollCallback(window, scrollCallback);

@@ -51,106 +51,48 @@ float interpolate(float a0, float a1, float w) {
  
 // Sample Perlin noise at coordinates x, y
 float noise(float x, float y) {
-
-
-
     // Get the corner positions, x0 is left, x1 is left
-
     int x0 = (int)x; 
-
     int y0 = (int)y;
-
     int x1 = x0 + 1;
-
     int y1 = y0 + 1;
 
-
-
     // Compute Interpolation weights
-
     float sx = x - (float)x0;
-
     float sy = y - (float)y0;
 
-
-
-
-
     struct corner tlCorner;
-
-
     struct corner blCorner;
-
-
     struct corner trCorner;
-
-
     struct corner brCorner;
-
-
     tlCorner.x = x0, tlCorner.y = y0;
-
-
     blCorner.x = x0, blCorner.y = y1;
-
-
     trCorner.x = x1, trCorner.y = y0;
-
-
     brCorner.x = x1, brCorner.y = y1;
-
-
     tlCorner.gradientVec = randomGradient(tlCorner.x, tlCorner.y);
-
-
     blCorner.gradientVec = randomGradient(blCorner.x, blCorner.y);
-
-
     trCorner.gradientVec = randomGradient(trCorner.x, trCorner.y);
-
-
     brCorner.gradientVec = randomGradient(brCorner.x, brCorner.y);
 
-
-
     // Get distance vectors(A vector from the corner which points to the tile) for each corner of the octant.
-
     struct vec2d tlDistanceVector;
-
     struct vec2d blDistanceVector;
-
     struct vec2d trDistanceVector;
-
     struct vec2d brDistanceVector;
-
     tlDistanceVector.x = x - tlCorner.x, tlDistanceVector.y = y - tlCorner.y; 
-
     blDistanceVector.x = x - blCorner.x, blDistanceVector.y = y - blCorner.y; 
-
     trDistanceVector.x = x - trCorner.x, trDistanceVector.y = y - trCorner.y; 
-
     brDistanceVector.x = x - brCorner.x, brDistanceVector.y = y - brCorner.y; 
 
-
-
     // Get dot product from the distance vectors and the gradient vectors.
-
     float tlDotProduct = (tlDistanceVector.x * tlCorner.gradientVec.x) + (tlDistanceVector.y * tlCorner.gradientVec.y);
-
     float blDotProduct = (blDistanceVector.x * blCorner.gradientVec.x) + (blDistanceVector.y * blCorner.gradientVec.y);
-
     float trDotProduct = (trDistanceVector.x * trCorner.gradientVec.x) + (trDistanceVector.y * trCorner.gradientVec.y);
-
     float brDotProduct = (brDistanceVector.x * brCorner.gradientVec.x) + (brDistanceVector.y * brCorner.gradientVec.y);
 
-
-
     // Interpolation.
-
     float tlTrInterpolation = interpolate(tlDotProduct, trDotProduct, sx);
-
     float blBrInterpolation = interpolate(blDotProduct, brDotProduct, sx);
-
 
     return interpolate(tlTrInterpolation, blBrInterpolation, sy);
 

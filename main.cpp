@@ -112,44 +112,38 @@ int main()
     glEnableVertexAttribArray(0);
     glBindVertexArray(0); 
 
-    int nrAttributes;
+    int nrAttributes, max;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max);
     cout << "Maximum nr of vertex attributes supported: " << nrAttributes << endl;
-Light lights[1000];
-// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    cout << "Maximum texture size supported: " << max  << endl;
+    Light lights[1000];
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
-    lightingShader.setInt("normalMap", 2);
     lightingShader.setInt("width", width);
     lightingShader.setInt("height", height);
     unsigned int diffuseMap = loadTexture(FileSystem::getPath("images/spritesheet.png").c_str());
     unsigned int specularMap = loadTexture(FileSystem::getPath("images/spritesheetspecularmap.png").c_str());
     srand(time(0));
     Light light;
-    for (int i = 0; i < 1; i++) {
-        // float r = round(sin(rand()) * 0.5 + 0.5);
-        // float g = round(sin(rand()) * 0.5 + 0.5);
-        // float b = round(sin(rand()) * 0.5 + 0.5);
-        float r = 255 / 255;
-        float g = 204 / 255;
-        float b = 51 / 255;
-        light = Light(2.0, glm::vec3(500, 30, 500), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 1000, lightingShader);
-        light.init(lightingShader);
-        lights[light.ID] = light;
-    }
-
+    // for (int i = 0; i < 1; i++) {
+    //     // float r = round(sin(rand()) * 0.5 + 0.5);
+    //     // float g = round(sin(rand()) * 0.5 + 0.5);
+    //     // float b = round(sin(rand()) * 0.5 + 0.5);
+    //     float r = 255 / 255;
+    //     float g = 204 / 255;
+    //     float b = 51 / 255;
+    //     light = Light(2.0, glm::vec3(500, 30, 500), glm::vec3(r / 20, g / 20, b / 20), glm::vec3(r / 1.25, g / 1.25, b / 1.25), glm::vec3(r, g, b), 1000, lightingShader);
+    //     light.init(lightingShader);
+    //     lights[light.ID] = light;
+    // }
     const char* text = to_string(1000 / deltaTime / 1000).c_str();
     int jeffy = 0;
     float deltaTimeList[50];
 
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
-    // Rendering stuff.
-    glGenVertexArrays(1, &ChunkVAO);
-    glGenBuffers(1, &ChunkVBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(ChunkVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, ChunkVBO);
     float timeTakenToStart = glfwGetTime();
     for (int y = 0; y < height / chunkSize; y++) {
         chunks.push_back(vector<Chunk>());
@@ -162,26 +156,18 @@ Light lights[1000];
     
 
     // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
+    // unsigned int textureID;
+    // glGenTextures(1, &textureID);
+    // glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // Upload the float data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, normals.data());
-    GLint max_texture_size;
-    // Set texture filtering and wrapping
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // or GL_LINEAR
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // or GL_LINEAR
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // // Upload the float data
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, normals.data());
+    // GLint max_texture_size;
+    // // Set texture filtering and wrapping
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // or GL_LINEAR
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // or GL_LINEAR
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // 18 fps when looking down at the entire map with half the screen. (I go up until I can barely see the entire map)
     while(!glfwWindowShouldClose(window))   {
@@ -229,8 +215,8 @@ Light lights[1000];
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
         // bind height map
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, textureID);
+        // glActiveTexture(GL_TEXTURE2);
+        // glBindTexture(GL_TEXTURE_2D, textureID);
 
 
         glm::mat4 view;
@@ -244,12 +230,12 @@ Light lights[1000];
         lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
         lightingShader.setFloat("material.shininess", 1.0f);
         lightingShader.setVec3("dirLight.direction", -0.0f, -1.0f, 0.0f);
-        lightingShader.setVec3("dirLight.ambient", 0.05f * 6, 0.05f * 6, 0.05f * 6);
-        lightingShader.setVec3("dirLight.diffuse", 0.4f * 6, 0.4f * 6, 0.4f * 6);
-        lightingShader.setVec3("dirLight.specular", 0.5f * 6, 0.5f * 6, 0.5f * 6);
-        for (int i = 0; i < pointLightCount; i++) {
-            lights[i].setPosition(glm::vec3(lights[i].position.x + sin(timeValue), lights[i].position.y, lights[i].position.z + cos(timeValue)), lightingShader);
-        }
+        lightingShader.setVec3("dirLight.ambient", 0.05f * 1, 0.05f * 1, 0.05f * 1);
+        lightingShader.setVec3("dirLight.diffuse", 0.4f * 1, 0.4f * 1, 0.4f * 1);
+        lightingShader.setVec3("dirLight.specular", 0.5f * 1, 0.5f * 1, 0.5f * 1);
+        // for (int i = 0; i < pointLightCount; i++) {
+        //     lights[i].setPosition(glm::vec3(lights[i].position.x + sin(timeValue), lights[i].position.y, lights[i].position.z + cos(timeValue)), lightingShader);
+        // }
         float greenValue = sin(timeValue);
         lightingShader.setFloat("timeOffsetColor", sin(timeValue));
         int viewLoc = glGetUniformLocation(lightingShader.ID, "view");
@@ -261,13 +247,12 @@ Light lights[1000];
 
 
         // draw the object
-        glBindVertexArray(ChunkVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, ChunkVBO);
+        
         // cout << "hi";
         for (int y = 0; y < height / chunkSize; y++) {
             for (int x = 0; x < width / chunkSize; x++) {
-                glBufferData(GL_ARRAY_BUFFER, chunks[y][x].vertices.size() * sizeof(float), chunks[y][x].vertices.data(), GL_STATIC_DRAW);
-                glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size());
+                glBindVertexArray(chunks[y][x].VAO);
+                glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
             }   
         }
         
@@ -278,9 +263,10 @@ Light lights[1000];
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
         glBindVertexArray(cubeVAO);
-        for (int i = 0; i < pointLightCount; i++) {
-            lights[i].render(lightCubeShader);
-        }
+        // for (int i = 0; i < pointLightCount; i++) {
+        //     lights[i].setPosition(glm::vec3(lights[i].position.x + sin(timeValue) * 5, lights[i].position.y + sin(timeValue) * 5, lights[i].position.z + sin(timeValue) * 5), lightingShader);
+        //     lights[i].render(lightCubeShader);
+        // }
 
 
         glfwSwapBuffers(window);

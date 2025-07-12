@@ -1,16 +1,17 @@
 #version 460 core
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
-layout (location = 1) in vec2 aTexCoords; 
-layout (location = 2) in float aType; 
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords; 
+layout (location = 3) in float aType; 
 
-out vec3 tileColor; // output a color to the fragment shader
+out vec3 Normal;
 out vec2 TexCoords;
+out vec3 FragPos;  
+out float type;
 uniform float time;
 uniform mat4 view;
 uniform mat4 projection;
-out vec3 FragPos;  
-out vec3 Normal;
-out float type;
+
 
 mat4 rotationMatrix(float angleX, float angleY, float angleZ) {
     float cX = cos(angleX);
@@ -52,6 +53,7 @@ void main()
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     TexCoords = aTexCoords;
     type = aType;
+    Normal = aNormal;
     gl_Position = projection * view * vec4(FragPos.x, FragPos.y, FragPos.z, 1.0);
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
 }
