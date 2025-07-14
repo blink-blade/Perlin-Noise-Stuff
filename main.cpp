@@ -212,7 +212,7 @@ int main()
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 10000.0f);
+        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100000.0f);
 
 
         lightingShader.use();
@@ -238,8 +238,8 @@ int main()
         // draw the object
         
         // cout << "hi";
-        for (int offsetY = 0; offsetY < 5000; offsetY += 1000) {
-            for (int offsetX = 0; offsetX < 5000; offsetX += 1000) {
+        for (int offsetY = -5000; offsetY < 5000; offsetY += 1000) {
+            for (int offsetX = -5000; offsetX < 5000; offsetX += 1000) {
                 for (int y = 0; y < height / chunkSize; y++) {
                     for (int x = 0; x < width / chunkSize; x++) {
                         lightingShader.setVec2("offset", offsetX, offsetY);
