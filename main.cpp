@@ -21,6 +21,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "generator.h"
 #include "filesystem.h"
+// #include "skybox.h"
 
 using namespace std;
 
@@ -141,6 +142,8 @@ int main()
     const char* text = to_string(1000 / deltaTime / 1000).c_str();
     int jeffy = 0;
     float deltaTimeList[50];
+    // Shader skyBoxShader("shaders/skybox_vertex_shader.glsl", "shaders/skybox_fragment_shader.glsl");
+    // SkyBox skybox = SkyBox(skyBoxShader);
 
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
@@ -153,22 +156,8 @@ int main()
         }   
     }
     cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
+
     
-
-    // glUniform1i(glGetUniformLocation(lightingShader.ID, "texture1"), 0);
-    // unsigned int textureID;
-    // glGenTextures(1, &textureID);
-    // glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // // Upload the float data
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, normals.data());
-    // GLint max_texture_size;
-    // // Set texture filtering and wrapping
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // or GL_LINEAR
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // or GL_LINEAR
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
     // 18 fps when looking down at the entire map with half the screen. (I go up until I can barely see the entire map)
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
@@ -216,7 +205,7 @@ int main()
         glBindTexture(GL_TEXTURE_2D, specularMap);
         // bind height map
         // glActiveTexture(GL_TEXTURE2);
-        // glBindTexture(GL_TEXTURE_2D, textureID);
+        // glBindTexture(GL_TEXTURE_2D, skybox.textureID);
 
 
         glm::mat4 view;
@@ -230,7 +219,7 @@ int main()
         lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
         lightingShader.setFloat("material.shininess", 1.0f);
         lightingShader.setVec3("dirLight.direction", -0.0f, -1.0f, 0.0f);
-        lightingShader.setVec3("dirLight.ambient", 0.05f * 1, 0.05f * 1, 0.05f * 1);
+        lightingShader.setVec3("dirLight.ambient", 0.3f * 1, 0.3f * 1, 0.3f * 1);
         lightingShader.setVec3("dirLight.diffuse", 0.4f * 1, 0.4f * 1, 0.4f * 1);
         lightingShader.setVec3("dirLight.specular", 0.5f * 1, 0.5f * 1, 0.5f * 1);
         // for (int i = 0; i < pointLightCount; i++) {
@@ -249,10 +238,17 @@ int main()
         // draw the object
         
         // cout << "hi";
-        for (int y = 0; y < height / chunkSize; y++) {
-            for (int x = 0; x < width / chunkSize; x++) {
-                glBindVertexArray(chunks[y][x].VAO);
-                glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
+        for (int offsetY = 0; offsetY < 5000; offsetY += 1000) {
+            for (int offsetX = 0; offsetX < 5000; offsetX += 1000) {
+                for (int y = 0; y < height / chunkSize; y++) {
+                    for (int x = 0; x < width / chunkSize; x++) {
+                        lightingShader.setVec2("offset", offsetX, offsetY);
+                        glBindVertexArray(chunks[y][x].VAO);
+                        // This was 69fps
+                        // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
+                        glDrawElements(GL_TRIANGLES, 60000, GL_UNSIGNED_INT, 0);
+                    }   
+                }
             }   
         }
         
@@ -267,6 +263,10 @@ int main()
         //     lights[i].setPosition(glm::vec3(lights[i].position.x + sin(timeValue) * 5, lights[i].position.y + sin(timeValue) * 5, lights[i].position.z + sin(timeValue) * 5), lightingShader);
         //     lights[i].render(lightCubeShader);
         // }
+        // skyBoxShader.use();
+        // skyBoxShader.setMat4("projection", projection);
+        // skyBoxShader.setMat4("view", view);
+        // skybox.render(skyBoxShader);
 
 
         glfwSwapBuffers(window);

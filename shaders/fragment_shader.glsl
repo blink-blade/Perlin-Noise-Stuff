@@ -49,7 +49,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 reflectDir = reflect(-lightDir, normal);
     float shininess;
     if (type == 0.0) {
-        shininess = 32.0;
+        shininess = 10.0;
     }
     else if (type == 1.0) {
         shininess = 5.0;

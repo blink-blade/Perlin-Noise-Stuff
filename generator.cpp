@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include "helpers.h"
 #include <vector>
+#include <algorithm>
+#include <iostream>
 
 struct vec2d {
     float x;
@@ -17,7 +19,6 @@ struct corner {
     float y;
     struct vec2d gradientVec;
 };
-
 
 
 unsigned int seed = 100;
@@ -176,20 +177,20 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
                 amp /= 2;
             }
             
-            if (islandMode == 1) {
-                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                distance_to_center = sqrt(pow((x - width / 2), 2) + pow((y - height / 2), 2));
-                val = fabs(val) - (distance_to_center / divide_amount);
-            }
-            else {
-                // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
-                distance_to_center = sqrt(pow((x - width / 2), 2) + pow((y - height / 2), 2));
-                val -= (distance_to_center / divide_amount);
-            }
+            // if (islandMode == 1) {
+            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+            //     distance_to_center = sqrt(pow((x - width / 2), 2) + pow((y - height / 2), 2));
+            //     val = fabs(val) - (distance_to_center / divide_amount);
+            // }
+            // else {
+            //     // Using the pythagoras theorem, calculate the distance from the center of the map. Then change the value depending on that distance, this makes it an island shape.
+            //     distance_to_center = sqrt(pow((x - width / 2), 2) + pow((y - height / 2), 2));
+            //     val -= (distance_to_center / divide_amount);
+            // }
             
             val += offset;
 
-            noiseMap[y - noiseY].push_back(val);
+            noiseMap[y - noiseY].push_back(max(val * 25, -17.25f));
         }
     }
     return noiseMap;

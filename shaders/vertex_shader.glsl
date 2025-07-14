@@ -11,7 +11,7 @@ out float type;
 uniform float time;
 uniform mat4 view;
 uniform mat4 projection;
-
+uniform vec2 offset;
 
 mat4 rotationMatrix(float angleX, float angleY, float angleZ) {
     float cX = cos(angleX);
@@ -40,7 +40,7 @@ float rand(vec2 co) {
 
 void main()
 {
-    FragPos = vec3(vec4(aPos.x, aPos.y, aPos.z, 1.0));
+    FragPos = vec3(vec4(aPos.x + offset.x, aPos.y, aPos.z + offset.y, 1.0));
     //mat4 translation = mat4(1.0, 0.0, 0.0, -1000.0f,
           //      0.0, 1.0, 0.0, 0.0,
         //        0.0, 0.0, 1.0, -1000.0f,
