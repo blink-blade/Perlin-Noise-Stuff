@@ -173,8 +173,8 @@ public:
                 // setVertex(topRight.x, topRight.y, topRight.z, normal.x, normal.y, normal.z, tR, tT, type);
             }   
         }
-        for (int y = 0; y < chunkSize; y++) {
-            for (int x = 0; x < chunkSize; x++) {
+        for (int y = 0; y < chunkSize + 1; y++) {
+            for (int x = 0; x < chunkSize + 1; x++) {
                 indices.push_back(xyToI(x, y, chunkSize + 1));
                 indices.push_back(xyToI(x + 1, y, chunkSize + 1));
                 indices.push_back(xyToI(x + 1, x + 1, chunkSize + 1));
