@@ -111,28 +111,6 @@ int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float freq
     return maxPos + 2;
 }
 
-void makeCorners(int noiseWidth, int noiseHeight, int noiseX, int noiseY, int layerAmount, float frequency) {
-    int max = getMaxCornerPos(noiseWidth, noiseHeight, layerAmount, frequency);
-    struct corner corner;
-
-    delete cornerGrid;
-    // Allocate memory for the array.
-    cornerGrid = new struct corner*[max];
-
-    for (int h = 0; h < max; h++) {
-        cornerGrid[h] = new struct corner[max];
-    }
-    
-    for (int x = 0; x < max; x++) {
-        for (int y = 0; y < max; y++) {
-            corner.x = x + noiseX / noiseWidth;
-            corner.y = y + noiseY / noiseWidth;
-            corner.gradientVec = randomGradient(x + noiseX / noiseWidth, y + noiseY / noiseWidth);
-            cornerGrid[y][x] = corner;
-        }
-    }
-}
-
 vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, float frequency, float distanceEffect, int islandMode, int noiseX, int noiseY, float distanceCutOffOffsetX, float distanceCutOffOffsetY, float offset, int landOnly, int distanceCutOff, unsigned int newSeed) {
     int x, y, i;
     float cutOffCenterPointX = ((float)noiseWidth / 2) + distanceCutOffOffsetX;
