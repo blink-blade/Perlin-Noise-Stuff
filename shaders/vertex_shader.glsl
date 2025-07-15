@@ -4,14 +4,10 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords; 
 layout (location = 3) in float aType; 
 
-out vec3 Normal;
-out vec2 TexCoords;
-out vec3 FragPos;  
-out float type;
-uniform float time;
-uniform mat4 view;
-uniform mat4 projection;
-uniform vec2 offset;
+// out vec3 NormalC;
+// out vec2 TexCoordC;
+// out float typeC;
+out vec2 uvs;
 
 mat4 rotationMatrix(float angleX, float angleY, float angleZ) {
     float cX = cos(angleX);
@@ -40,7 +36,6 @@ float rand(vec2 co) {
 
 void main()
 {
-    FragPos = vec3(vec4(aPos.x + offset.x, aPos.y, aPos.z + offset.y, 1.0));
     //mat4 translation = mat4(1.0, 0.0, 0.0, -1000.0f,
           //      0.0, 1.0, 0.0, 0.0,
         //        0.0, 0.0, 1.0, -1000.0f,
@@ -51,9 +46,10 @@ void main()
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
-    TexCoords = aTexCoords;
-    type = aType;
-    Normal = aNormal;
-    gl_Position = projection * view * vec4(FragPos.x, FragPos.y, FragPos.z, 1.0);
+    // TexCoordC = aTexCoord;
+    // typeC = aType;
+    // NormalC = aNormal;
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    uvs = aTexCoords;
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
 }

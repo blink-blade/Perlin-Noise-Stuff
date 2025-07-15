@@ -94,10 +94,10 @@ std::vector<glm::vec3> normals(width * height);
 int main()
 {
     glfwInits();
-    Shader lightingShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+    Shader lightingShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl", "shaders/tessellation.tesc", "shaders/tessellation.tese");
     Shader lightCubeShader("shaders/light_vertex_shader.glsl", "shaders/light_fragment_shader.glsl");
-    lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
+    lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
     // first, configure the cube's VAO (and VBO)
     unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
@@ -177,7 +177,7 @@ int main()
             glfwSetWindowTitle(window, text);
         }
         // cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << "\n";
-        cameraSpeed = 500.5f * deltaTime;
+        cameraSpeed = 50.5f * deltaTime;
         processInput(window);
         // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -238,15 +238,15 @@ int main()
         // draw the object
         
         // cout << "hi";
-        for (int offsetY = -10000; offsetY < 10000; offsetY += 1000) {
-            for (int offsetX = -10000; offsetX < 10000; offsetX += 1000) {
+        for (int offsetY = -1000; offsetY < 1000; offsetY += 1000) {
+            for (int offsetX = -1000; offsetX < 1000; offsetX += 1000) {
                 for (int y = 0; y < height / chunkSize; y++) {
                     for (int x = 0; x < width / chunkSize; x++) {
                         lightingShader.setVec2("offset", offsetX, offsetY);
                         glBindVertexArray(chunks[y][x].VAO);
                         // This was 69fps
                         // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
-                        glDrawElements(GL_TRIANGLES, 60000, GL_UNSIGNED_INT, 0);
+                        glDrawElements(GL_PATCHES, chunks[y][x].indices.size(), GL_UNSIGNED_INT, 0);
                     }   
                 }
             }   

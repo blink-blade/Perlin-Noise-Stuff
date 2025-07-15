@@ -156,9 +156,6 @@ public:
                 indices.push_back(xyToI(x, y, chunkSize + 1));
                 indices.push_back(xyToI(x + 1, y, chunkSize + 1));
                 indices.push_back(xyToI(x + 1, y + 1, chunkSize + 1));
-
-                indices.push_back(xyToI(x, y, chunkSize + 1));
-                indices.push_back(xyToI(x + 1, y + 1, chunkSize + 1));
                 indices.push_back(xyToI(x, y + 1, chunkSize + 1));
             }   
         }
