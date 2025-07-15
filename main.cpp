@@ -177,7 +177,7 @@ int main()
             glfwSetWindowTitle(window, text);
         }
         // cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << "\n";
-        cameraSpeed = 50.5f * deltaTime;
+        cameraSpeed = 10.5f * deltaTime;
         processInput(window);
         // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
