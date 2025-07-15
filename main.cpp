@@ -119,7 +119,7 @@ int main()
     cout << "Maximum nr of vertex attributes supported: " << nrAttributes << endl;
     cout << "Maximum texture size supported: " << max  << endl;
     Light lights[1000];
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
     lightingShader.setInt("width", width);
@@ -238,19 +238,19 @@ int main()
         // draw the object
         
         // cout << "hi";
-        for (int offsetY = -1000; offsetY < 1000; offsetY += 1000) {
-            for (int offsetX = -1000; offsetX < 1000; offsetX += 1000) {
-                for (int y = 0; y < height / chunkSize; y++) {
-                    for (int x = 0; x < width / chunkSize; x++) {
-                        lightingShader.setVec2("offset", offsetX, offsetY);
-                        glBindVertexArray(chunks[y][x].VAO);
-                        // This was 69fps
-                        // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
-                        glDrawElements(GL_PATCHES, chunks[y][x].indices.size(), GL_UNSIGNED_INT, 0);
-                    }   
-                }
+        // for (int offsetY = -1000; offsetY < 1000; offsetY += 1000) {
+        //     for (int offsetX = -1000; offsetX < 1000; offsetX += 1000) {
+        for (int y = 0; y < height / chunkSize; y++) {
+            for (int x = 0; x < width / chunkSize; x++) {
+                lightingShader.setVec2("offset", 0, 0);
+                glBindVertexArray(chunks[y][x].VAO);
+                // This was 69fps
+                // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
+                glDrawElements(GL_PATCHES, chunks[y][x].indices.size(), GL_UNSIGNED_INT, 0);
             }   
         }
+        //     }   
+        // }
         
         // glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 

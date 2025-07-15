@@ -4,9 +4,8 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords; 
 layout (location = 3) in float aType; 
 
-// out vec3 NormalC;
-// out vec2 TexCoordC;
-// out float typeC;
+out vec3 NormalC;
+out float typeC;
 out vec2 uvs;
 
 mat4 rotationMatrix(float angleX, float angleY, float angleZ) {
@@ -46,10 +45,9 @@ void main()
     //gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
-    // TexCoordC = aTexCoord;
-    // typeC = aType;
-    // NormalC = aNormal;
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    typeC = aType;
+    NormalC = aNormal;
     uvs = aTexCoords;
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com
 }
