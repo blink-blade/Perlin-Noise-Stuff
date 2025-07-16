@@ -177,7 +177,7 @@ int main()
             glfwSetWindowTitle(window, text);
         }
         // cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << "\n";
-        cameraSpeed = 10.5f * deltaTime;
+        cameraSpeed = 50.5f * deltaTime;
         processInput(window);
         // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -238,19 +238,19 @@ int main()
         // draw the object
         
         // cout << "hi";
-        // for (int offsetY = -1000; offsetY < 1000; offsetY += 1000) {
-        //     for (int offsetX = -1000; offsetX < 1000; offsetX += 1000) {
-        for (int y = 0; y < height / chunkSize; y++) {
-            for (int x = 0; x < width / chunkSize; x++) {
-                lightingShader.setVec2("offset", 0, 0);
-                glBindVertexArray(chunks[y][x].VAO);
-                // This was 69fps
-                // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
-                glDrawElements(GL_PATCHES, chunks[y][x].indices.size(), GL_UNSIGNED_INT, 0);
+        for (int offsetY = -15000; offsetY < 15000; offsetY += 1000) {
+            for (int offsetX = -15000; offsetX < 15000; offsetX += 1000) {
+                for (int y = 0; y < height / chunkSize; y++) {
+                    for (int x = 0; x < width / chunkSize; x++) {
+                        lightingShader.setVec2("offset", offsetX, offsetY);
+                        glBindVertexArray(chunks[y][x].VAO);
+                        // This was 69fps
+                        // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
+                        glDrawElements(GL_PATCHES, chunks[y][x].indices.size(), GL_UNSIGNED_INT, 0);
+                    }   
+                }
             }   
         }
-        //     }   
-        // }
         
         // glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 

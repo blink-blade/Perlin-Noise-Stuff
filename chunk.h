@@ -121,42 +121,41 @@ public:
                 normals[y][x] = glm::normalize(normals[y][x]);
             }   
         }
-        for (int y = 0; y < chunkSize + 1; y++) {
-            normals.push_back(vector<glm::vec3>());
-            for (int x = 0; x < chunkSize + 1; x++) {
-                if (heightMap[y][x] <= -17.25) {
-                    type = 0.0;
-                    tL = 0.0f / 1024.0f;
-                    tB = 0.0f / 1024.0f;
-                    tR = 16.0 / 1024.0f;
-                    tT = 16.0 / 1024.0f;
-                }
-                else if (heightMap[y][x] < -13.75) {
-                    type = 1.0;
-                    tL = 16.0f / 1024.0f;
-                    tB = 0.0f / 1024.0f;
-                    tR = 32.0f / 1024.0f;
-                    tT = 16.0f / 1024.0f;
-                }
-                else {
-                    type = 2.0;
-                    tL = 32.0f / 1024.0f;
-                    tB = 0.0f / 1024.0f;
-                    tR = 48.0f / 1024.0f;
-                    tT = 16.0f / 1024.0f;
-                }
-                tR -= 0.001;
-                tT -= 0.001;
-                normal = normals[y][x];
-                setVertex(x + pos.x, heightMap[y][x], y + pos.y, normal.x, normal.y, normal.z, tL, tB, type);
+        for (int y = 0; y < 11; y++) {
+            for (int x = 0; x < 11; x++) {
+                // if (heightMap[y * 10][x * 10] <= -17.25) {
+                //     type = 0.0;
+                //     tL = 0.0f / 1024.0f;
+                //     tB = 0.0f / 1024.0f;
+                //     tR = 16.0 / 1024.0f;
+                //     tT = 16.0 / 1024.0f;
+                // }
+                // else if (heightMap[y * 10][x * 10] < -13.75) {
+                //     type = 1.0;
+                //     tL = 16.0f / 1024.0f;
+                //     tB = 0.0f / 1024.0f;
+                //     tR = 32.0f / 1024.0f;
+                //     tT = 16.0f / 1024.0f;
+                // }
+                // else {
+                //     type = 2.0;
+                //     tL = 32.0f / 1024.0f;
+                //     tB = 0.0f / 1024.0f;
+                //     tR = 48.0f / 1024.0f;
+                //     tT = 16.0f / 1024.0f;
+                // }
+                // tR -= 0.001;
+                // tT -= 0.001;
+                // normal = normals[y][x];
+                setVertex(x * 10 + pos.x, 0, y * 10 + pos.y, 0.0, 0.0, 0.0, tL, tB, type);
             }   
         }
-        for (int y = 0; y < chunkSize; y++) {
-            for (int x = 0; x < chunkSize; x++) {
-                indices.push_back(xyToI(x, y, chunkSize + 1));
-                indices.push_back(xyToI(x + 1, y, chunkSize + 1));
-                indices.push_back(xyToI(x + 1, y + 1, chunkSize + 1));
-                indices.push_back(xyToI(x, y + 1, chunkSize + 1));
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                indices.push_back(xyToI(x, y, 11));
+                indices.push_back(xyToI(x + 1, y, 11));
+                indices.push_back(xyToI(x + 1, y + 1, 11));
+                indices.push_back(xyToI(x, y + 1, 11));
             }   
         }
     }
