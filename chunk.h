@@ -42,14 +42,12 @@ public:
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
-        glEnableVertexAttribArray(3);
     }
 
     glm::vec3 calculateSurfaceNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) {
@@ -62,13 +60,10 @@ public:
         return glm::normalize(normal);
     }
     // -------------
-    void setVertex(float x, float y, float z, float nX, float nY, float nZ, float tX, float tY, int type) {
+    void setVertex(float x, float y, float z, float tX, float tY, int type) {
         vertices.push_back(x);
         vertices.push_back(y);
         vertices.push_back(z);
-        vertices.push_back(nX);
-        vertices.push_back(nY);
-        vertices.push_back(nZ);
         vertices.push_back(tX);
         vertices.push_back(tY);
         vertices.push_back(type);
@@ -94,66 +89,41 @@ public:
         heightMap = generateNoiseMap(chunkSize + 2, chunkSize + 2, 4, 0.5, 6, 1, pos.x, pos.y, 0, 0, -0.5, 0, 0, 123);
         // cout << heightMap.x.size();
 
-        for (int y = 0; y < chunkSize + 2; y++) {
-            normals.push_back(vector<glm::vec3>());
-            for (int x = 0; x < chunkSize + 2; x++) {
-                normals[y].push_back(glm::vec3(0.0, 0.0, 0.0));
-            }   
-        }
-        for (int y = 0; y < chunkSize + 1; y++) {
-            for (int x = 0; x < chunkSize + 1; x++) {
-                bottomLeft = glm::vec3(x, heightMap[y][x], y);
-                bottomRight = glm::vec3(x + 1, heightMap[y][x + 1], y);
-                topLeft = glm::vec3(x, heightMap[y + 1][x], y + 1);
-                topRight = glm::vec3(x + 1, heightMap[y + 1][x + 1], y + 1);
-                normal = calculateSurfaceNormal(bottomLeft, topRight, topLeft);
-                normals[bottomLeft.z][bottomLeft.x] += normal;
-                normals[topRight.z][topRight.x] += normal;
-                normals[topLeft.z][topLeft.x] += normal;
-                normal = calculateSurfaceNormal(bottomLeft, bottomRight, topRight);
-                normals[bottomLeft.z][bottomLeft.x] += normal;
-                normals[bottomRight.z][bottomRight.x] += normal;
-                normals[topRight.z][topRight.x] += normal;
-            }   
-        }
-        for (int y = 0; y < chunkSize + 1; y++) {
-            for (int x = 0; x < chunkSize + 1; x++) {
-                normals[y][x] = glm::normalize(normals[y][x]);
-            }   
-        }
         for (int y = 0; y < 11; y++) {
             for (int x = 0; x < 11; x++) {
-                // if (heightMap[y * 10][x * 10] <= -17.25) {
-                //     type = 0.0;
-                //     tL = 0.0f / 1024.0f;
-                //     tB = 0.0f / 1024.0f;
-                //     tR = 16.0 / 1024.0f;
-                //     tT = 16.0 / 1024.0f;
-                // }
-                // else if (heightMap[y * 10][x * 10] < -13.75) {
-                //     type = 1.0;
-                //     tL = 16.0f / 1024.0f;
-                //     tB = 0.0f / 1024.0f;
-                //     tR = 32.0f / 1024.0f;
-                //     tT = 16.0f / 1024.0f;
-                // }
-                // else {
-                //     type = 2.0;
-                //     tL = 32.0f / 1024.0f;
-                //     tB = 0.0f / 1024.0f;
-                //     tR = 48.0f / 1024.0f;
-                //     tT = 16.0f / 1024.0f;
-                // }
+                if (heightMap[y * 10][x * 10] <= -17.25) {
+                    type = 0.0;
+                    tL = 0.0f / 1024.0f;
+                    tB = 0.0f / 1024.0f;
+                    tR = 16.0 / 1024.0f;
+                    tT = 16.0 / 1024.0f;
+                }
+                else if (heightMap[y * 10][x * 10] < -13.75) {
+                    type = 1.0;
+                    tL = 16.0f / 1024.0f;
+                    tB = 0.0f / 1024.0f;
+                    tR = 32.0f / 1024.0f;
+                    tT = 16.0f / 1024.0f;
+                }
+                else {
+                    type = 2.0;
+                    tL = 32.0f / 1024.0f;
+                    tB = 0.0f / 1024.0f;
+                    tR = 48.0f / 1024.0f;
+                    tT = 16.0f / 1024.0f;
+                }
                 // tR -= 0.001;
                 // tT -= 0.001;
                 // normal = normals[y][x];
-                setVertex(x * 10 + pos.x, 0, y * 10 + pos.y, 0.0, 0.0, 0.0, tL, tB, type);
+                setVertex(x * 10 + pos.x, heightMap[y * 10][x * 10], y * 10 + pos.y, tL, tB, type);
             }   
         }
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 indices.push_back(xyToI(x, y, 11));
                 indices.push_back(xyToI(x + 1, y, 11));
+                indices.push_back(xyToI(x + 1, y + 1, 11));
+                indices.push_back(xyToI(x, y, 11));
                 indices.push_back(xyToI(x + 1, y + 1, 11));
                 indices.push_back(xyToI(x, y + 1, 11));
             }   

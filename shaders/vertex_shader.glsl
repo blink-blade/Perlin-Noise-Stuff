@@ -1,8 +1,7 @@
 #version 460 core
 layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoords; 
-layout (location = 3) in float aType; 
+layout (location = 1) in vec2 aTexCoords; 
+layout (location = 2) in float aType; 
 
 out vec3 NormalC;
 out float typeC;
@@ -46,7 +45,6 @@ void main()
     //gl_Position = projection * view * model * vec4(aPos, 1.0);
     //ourColor = vec3(aColor.x, aColor.y + (cos(time + (aPos.y / 25)) * 5), aColor.z + (sin(time + (aPos.z / 25))));
     typeC = aType;
-    NormalC = aNormal;
     uvs = aTexCoords;
     gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     // Need to fix this later, but if there were a non-uniform scale transform on the vertices, then the normals would need fixed. This is covered in the second page of the lighting section in learnopengl.com

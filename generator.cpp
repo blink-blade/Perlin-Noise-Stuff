@@ -17,7 +17,7 @@ struct vec2d {
 struct corner {
     float x;
     float y;
-    struct vec2d gradientVec;
+    glm::vec2 gradientVec;
 };
 
 
@@ -27,24 +27,17 @@ struct corner **cornerGrid;
 
 struct vec2d possibleGradientVectors[8];
 
-struct vec2d randomGradient(int ix, int iy) {
+float randd(glm::vec2 co) {
+    return glm::fract(sin(glm::dot(co, glm::vec2(12.9898,78.233))) * 43758.5453);
+}
 
-    // No precomputed gradients mean this works for any number of grid coordinates
-    const unsigned w = 8 * sizeof(unsigned);
-    const unsigned s = w / 2; 
-    unsigned a = ix, b = iy;
-    a *= 3284157443 * seed;
- 
-    b ^= a << s | a >> w - s;
-    b *= 1911520717 * seed;
- 
-    a ^= b << s | b >> w - s;
-    a *= 2048419325 * seed;
-    struct vec2d v;
-    v.x = sin(a);
-    v.y = cos(a);
+glm::vec2 randomGradient(float ix, float iy) {
+    glm::vec2 v;
+    v.x = sin(ix * randd(glm::vec2(ix, iy)));
+    v.y = cos(iy * randd(glm::vec2(ix, iy)));
     return v;
 }
+
  
 float interpolate(float a0, float a1, float w) {
     return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
@@ -99,18 +92,6 @@ float noise(float x, float y) {
 
 }
 
-int getMaxCornerPos(int noiseWidth, int noiseHeight, int layerAmount, float frequency) {
-    // The max x or y value that a corner could be positioned at.
-    float freq = frequency;
-    int maxW = noiseWidth - 1;
-    int maxPos;
-    for (int ii = 0; ii < layerAmount; ii++) {
-        maxPos = (int)((float)maxW * freq);
-        freq *= 2;
-    }
-    return maxPos + 2;
-}
-
 vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int layerAmount, float frequency, float distanceEffect, int islandMode, int noiseX, int noiseY, float distanceCutOffOffsetX, float distanceCutOffOffsetY, float offset, int landOnly, int distanceCutOff, unsigned int newSeed) {
     int x, y, i;
     float cutOffCenterPointX = ((float)noiseWidth / 2) + distanceCutOffOffsetX;
@@ -133,7 +114,7 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
     // Allocate memory for the array.
     vector<vector<float>> noiseMap;
 
-    frequency /= 50;
+    frequency /= 50.0;
     
     // makeCorners(noiseWidth, noiseHeight, noiseX, noiseY, layerAmount, frequency);
     for (int y = noiseY; y < noiseHeight + noiseY; y++)
@@ -166,9 +147,9 @@ vector<vector<float>> generateNoiseMap(int noiseWidth, int noiseHeight, int laye
             //     val -= (distance_to_center / divide_amount);
             // }
             
-            val += offset;
+            // val += offset;
 
-            noiseMap[y - noiseY].push_back(max(val * 25, -17.25f));
+            noiseMap[y - noiseY].push_back(val * 25);
         }
     }
     return noiseMap;

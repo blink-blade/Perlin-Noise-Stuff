@@ -50,6 +50,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     float shininess;
     if (type == 0.0) {
         shininess = 10.0;
+        
     }
     else if (type == 1.0) {
         shininess = 5.0;
@@ -67,7 +68,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
-    vec3 lightDir = normalize(light.position - fragPos);
+    vec3 lightDir = normalize(viewPos - fragPos);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
@@ -84,7 +85,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     }
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     // attenuation
-    float distance    = length(light.position - fragPos);
+    float distance    = length(viewPos - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + 
   			     light.quadratic * (distance * distance));    
     // combine results
@@ -106,4 +107,7 @@ void main() {
     for(int i = 0; i < pointLightCount; i++)
         result += CalcPointLight(pointLights[i], Normal, FragPos, viewDir);    
     FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    if (type == 0.0) {
+        FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
 }

@@ -148,13 +148,15 @@ int main()
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
     float timeTakenToStart = glfwGetTime();
-    for (int y = 0; y < height / chunkSize; y++) {
-        chunks.push_back(vector<Chunk>());
-        for (int x = 0; x < width / chunkSize; x++) {
-            chunks[y].push_back(Chunk(glm::vec2(x, y)));
-            // glBufferData(GL_ARRAY_BUFFER, chunks[y][x].vertices.size() * sizeof(float), chunks[y][x].vertices.data(), GL_STATIC_DRAW);
-        }   
-    }
+    // for (int y = 0; y < height / chunkSize; y++) {
+    //     chunks.push_back(vector<Chunk>());
+    //     for (int x = 0; x < width / chunkSize; x++) {
+    //         chunks[y].push_back(Chunk(glm::vec2(x, y)));
+    //         // glBufferData(GL_ARRAY_BUFFER, chunks[y][x].vertices.size() * sizeof(float), chunks[y][x].vertices.data(), GL_STATIC_DRAW);
+    //     }   
+    // }
+    chunks.push_back(vector<Chunk>());
+    chunks[0].push_back(Chunk(glm::vec2(0, 0)));
     cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
 
     
@@ -238,20 +240,19 @@ int main()
         // draw the object
         
         // cout << "hi";
-        for (int offsetY = -15000; offsetY < 15000; offsetY += 1000) {
-            for (int offsetX = -15000; offsetX < 15000; offsetX += 1000) {
-                for (int y = 0; y < height / chunkSize; y++) {
-                    for (int x = 0; x < width / chunkSize; x++) {
-                        lightingShader.setVec2("offset", offsetX, offsetY);
-                        glBindVertexArray(chunks[y][x].VAO);
-                        // This was 69fps
-                        // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
-                        glDrawElements(GL_PATCHES, chunks[y][x].indices.size(), GL_UNSIGNED_INT, 0);
-                    }   
-                }
-            }   
-        }
-        
+        // for (int offsetY = -0; offsetY < 10000; offsetY += chunkSize) {
+        //     for (int offsetX = -0; offsetX < 1000; offsetX += chunkSize) {
+        //         // for (int y = 0; y < 1; y++) {
+        //         //     for (int x = 0; x < 1; x++) {
+                lightingShader.setVec2("offset", 0, 0);
+                glBindVertexArray(chunks[0][0].VAO);
+                // This was 69fps
+                // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
+                glDrawElements(GL_PATCHES, chunks[0][0].indices.size(), GL_UNSIGNED_INT, 0);
+        //         //     }   
+        //         // }
+        //     }   
+        // }
         // glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 
         // also draw the lamp object
