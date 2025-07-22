@@ -55,8 +55,13 @@ extern glm::vec3 cameraUp;
 extern float fov;
 extern int chunkSize;
 extern unsigned int ChunkVBO, ChunkVAO;
-
 extern float cameraSpeed;
+extern float useTime;
+extern float setUniformTime;
+extern float dispatchTime;
+extern float transferTime;
+extern float verticesTime;
+extern float indicesTime;
 extern float deltaTime;	// Time between current frame and last frame
 extern float lastFrame; // Time of last frame
 extern GLFWwindow* window;

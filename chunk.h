@@ -7,12 +7,14 @@
 #include "generator.h" 
 #include "glm/detail/type_mat.hpp"
 #include "glm/glm.hpp"
+#include <GLFW/glfw3.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <vector>
 #include "glm/gtc/type_ptr.hpp"
+#include "shader.h"
 
 using namespace std;
 
@@ -28,10 +30,11 @@ public:
     unsigned int VAO, VBO, EBO;
 
     // ------------------------------------------------------------------------
-    Chunk(const glm::vec2 xz) {
+    Chunk(const glm::vec2 xz, ComputeShader generator, Shader renderShader) {
         pos = glm::vec2(xz.x * chunkSize, xz.y * chunkSize);
         chunkPos = xz;
-        generateHeightMap();
+        generateHeightMap(generator);
+        renderShader.use();
         // Rendering stuff.
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
@@ -73,7 +76,7 @@ public:
         return x + width*y;
     }
     // ------------------------------------------------------------------------
-    void generateHeightMap() {
+    void generateHeightMap(ComputeShader generator) {
         int currentIndex, bottomLeftIndex, bottomRightIndex, topLeftIndex, topRightIndex;
         glm::vec3 bottomLeft, bottomRight, topLeft, topRight, normal;
         glm::vec2 bottomLeftXY, bottomRightXY, topLeftXY, topRightXY;
@@ -86,48 +89,69 @@ public:
         //         heightMap[y].push_back(x + y);
         //     }
         // }
-        heightMap = generateNoiseMap(chunkSize + 2, chunkSize + 2, 4, 0.5, 6, 1, pos.x, pos.y, 0, 0, -0.5, 0, 0, 123);
+        // heightMap = generateNoiseMap(chunkSize + 2, chunkSize + 2, 4, 0.5, 6, 1, pos.x, pos.y, 0, 0, -0.5, 0, 0, 123);
         // cout << heightMap.x.size();
-
-        for (int y = 0; y < 11; y++) {
-            for (int x = 0; x < 11; x++) {
-                if (heightMap[y * 10][x * 10] <= -17.25) {
+        float timeVal = glfwGetTime();
+        generator.use();
+        useTime += glfwGetTime() - timeVal;
+        timeVal = glfwGetTime();
+        generator.setVec2("pos", pos.x, pos.y);
+        setUniformTime += glfwGetTime() - timeVal;
+        timeVal = glfwGetTime();
+        generator.dispatch();
+        dispatchTime += glfwGetTime() - timeVal;
+        timeVal = glfwGetTime();
+        // Note, I don't care if I don't need to send the entire RGBA values right now. If it needs to be faster, I'll just send the R values, but idc. 
+        std::vector<float> imageData(generator.workGroupAmount.x * generator.workGroupAmount.y);
+        glBindTexture(GL_TEXTURE_2D, generator.textureID);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, imageData.data());
+        glBindTexture(GL_TEXTURE_2D, 0);
+        transferTime += glfwGetTime() - timeVal;
+        timeVal = glfwGetTime();
+        float val;
+        for (int y = 0; y < chunkSize + 1; y++) {
+            for (int x = 0; x < chunkSize + 1; x++) {
+                val = imageData[xyToI(x, y, generator.workGroupAmount.x)];
+                if (val <= -17.25) {
                     type = 0.0;
-                    tL = 0.0f / 1024.0f;
-                    tB = 0.0f / 1024.0f;
-                    tR = 16.0 / 1024.0f;
-                    tT = 16.0 / 1024.0f;
+                    tL = 0.0f;
+                    tB = 0.0f;
+                    tR = 0.015625f;
+                    tT = 0.015625f;
                 }
-                else if (heightMap[y * 10][x * 10] < -13.75) {
+                else if (val < -13.75) {
                     type = 1.0;
-                    tL = 16.0f / 1024.0f;
-                    tB = 0.0f / 1024.0f;
-                    tR = 32.0f / 1024.0f;
-                    tT = 16.0f / 1024.0f;
+                    tL = 0.015625f;
+                    tB = 0.0;
+                    tR = 0.03125f;
+                    tT = 0.015625f;
                 }
                 else {
                     type = 2.0;
-                    tL = 32.0f / 1024.0f;
-                    tB = 0.0f / 1024.0f;
-                    tR = 48.0f / 1024.0f;
-                    tT = 16.0f / 1024.0f;
+                    tL = 0.03125f;
+                    tB = 0.0f;
+                    tR = 0.046875f;
+                    tT = 0.015625f;
                 }
                 // tR -= 0.001;
                 // tT -= 0.001;
                 // normal = normals[y][x];
-                setVertex(x * 10 + pos.x, heightMap[y * 10][x * 10], y * 10 + pos.y, tL, tB, type);
+                setVertex(x + pos.x, 0.0, y + pos.y, tL, tB, type);
             }   
         }
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                indices.push_back(xyToI(x, y, 11));
-                indices.push_back(xyToI(x + 1, y, 11));
-                indices.push_back(xyToI(x + 1, y + 1, 11));
-                indices.push_back(xyToI(x, y, 11));
-                indices.push_back(xyToI(x + 1, y + 1, 11));
-                indices.push_back(xyToI(x, y + 1, 11));
+        verticesTime += glfwGetTime() - timeVal;
+        timeVal = glfwGetTime();
+        for (int y = 0; y < chunkSize; y++) {
+            for (int x = 0; x < chunkSize; x++) {
+                indices.push_back(xyToI(x, y, chunkSize + 1));
+                indices.push_back(xyToI(x + 1, y, chunkSize + 1));
+                indices.push_back(xyToI(x + 1, y + 1, chunkSize + 1));
+                indices.push_back(xyToI(x, y, chunkSize + 1));
+                indices.push_back(xyToI(x + 1, y + 1, chunkSize + 1));
+                indices.push_back(xyToI(x, y + 1, chunkSize + 1));
             }   
         }
+        indicesTime += glfwGetTime() - timeVal;
     }
     // ------------------------------------------------------------------------
 };

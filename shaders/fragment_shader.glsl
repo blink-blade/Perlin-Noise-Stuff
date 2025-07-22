@@ -107,7 +107,4 @@ void main() {
     for(int i = 0; i < pointLightCount; i++)
         result += CalcPointLight(pointLights[i], Normal, FragPos, viewDir);    
     FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    if (type == 0.0) {
-        FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
 }

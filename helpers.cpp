@@ -24,7 +24,7 @@ int chunkSize = 100;
 unsigned int ChunkVBO, ChunkVAO;
 
 // x, y, z, fov,
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);  
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);  
 glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
 glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
@@ -41,8 +41,14 @@ int scroll = 0;
 GLFWwindow* window;
 int lastX, lastY;
 float xoffset, yaw, pitch;
-int width = 1000;
-int height = 1000;
+int width = 200;
+int height = 200;
+float useTime = 0;
+float setUniformTime = 0;
+float dispatchTime = 0;
+float transferTime = 0;
+float verticesTime = 0;
+float indicesTime = 0;
 int windowWidth;
 int windowHeight;
 int pointLightCount = 0;
@@ -189,7 +195,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 int glfwInits()
 {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);

@@ -52,7 +52,7 @@ public:
             // convert stream into string
             vertexCode = vShaderStream.str();
             fragmentCode = fShaderStream.str();			
-            // if geometry shader path is present, also load a geometry shader
+            // if tessellation shader path is present, also load a the tessellation shaders
             if(tessControlPath != nullptr) {
                 tCShaderFile.open(tessControlPath);
                 tEShaderFile.open(tessEvalPath);
@@ -88,50 +88,185 @@ public:
         glShaderSource(vertex, 1, &vShaderCode, NULL);
         glCompileShader(vertex);
         checkCompileErrors(vertex, "VERTEX");
-        // fragment Shader
-        fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
-        glCompileShader(fragment);
-        checkCompileErrors(fragment, "FRAGMENT");
-
         if(tessControlPath != nullptr)
         {
-            // vertex shader
+            // tessellation control shader
             tessControl = glCreateShader(GL_TESS_CONTROL_SHADER);
             glShaderSource(tessControl, 1, &tCShaderCode, NULL);
             glCompileShader(tessControl);
             checkCompileErrors(tessControl, "TESSELATION CONTROL");
-            // fragment Shader
+            // tessellation evaluation Shader
             tessEval = glCreateShader(GL_TESS_EVALUATION_SHADER);
             glShaderSource(tessEval, 1, &tEShaderCode, NULL);
             glCompileShader(tessEval);
             checkCompileErrors(tessEval, "TESSELATION EVALUTATION");
         }
+        // fragment Shader
+        fragment = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glCompileShader(fragment);
+        checkCompileErrors(fragment, "FRAGMENT");
         // shader Program
         ID = glCreateProgram();
         glAttachShader(ID, vertex);
-        glAttachShader(ID, fragment);
         if (tessControlPath != nullptr) {
             glAttachShader(ID, tessControl);
             glAttachShader(ID, tessEval);
         }
+        glAttachShader(ID, fragment);
+
             
         glLinkProgram(ID);
+        // NOTE: Uncomment this when problems happen.
         // checkCompileErrors(ID, "PROGRAM");
 
         // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(vertex);
-        glDeleteShader(fragment);
         if (tessControlPath != nullptr) {
             glDeleteShader(tessControl);
             glDeleteShader(tessEval);
         }
+        glDeleteShader(fragment);
     }
     // activate the shader
     // ------------------------------------------------------------------------
     void use() 
     { 
         glUseProgram(ID); 
+    }
+    // utility uniform functions
+    // ------------------------------------------------------------------------
+    void setBool(const string &name, bool value) const
+    {         
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value); 
+    }
+    // ------------------------------------------------------------------------
+    void setInt(const string &name, int value) const
+    { 
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), value); 
+    }
+    // ------------------------------------------------------------------------
+    void setFloat(const string &name, float value) const
+    { 
+        glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
+    }
+    // ------------------------------------------------------------------------
+    void setVec2(const string &name, float x, float y) const
+    { 
+        glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(glm::vec2(x, y))); 
+    }
+    // ------------------------------------------------------------------------
+    void setVec3(const string &name, float x, float y, float z) const
+    { 
+        glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(glm::vec3(x, y, z))); 
+    }
+    // ------------------------------------------------------------------------
+    void setMat4(const string &name, glm::mat4 matrix) const
+    { 
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); 
+    }
+    // ------------------------------------------------------------------------
+
+private:
+    // utility function for checking shader compilation/linking errors.
+    // ------------------------------------------------------------------------
+    void checkCompileErrors(GLuint shader, std::string type)
+    {
+        GLint success;
+        GLchar infoLog[1024];
+
+        if(type != "PROGRAM")
+        {
+            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+            if(!success)
+            {
+                glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            }
+        }
+        else
+        {
+            glGetProgramiv(shader, GL_LINK_STATUS, &success);
+            if(!success)
+            {
+                glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            }
+        }
+        
+    }
+};
+
+class ComputeShader {
+public:
+    unsigned int ID, textureID;
+    glm::vec3 workGroupAmount;
+    // constructor generates the shader on the fly
+    // ------------------------------------------------------------------------
+    ComputeShader(const char* shaderPath, int wGSX, int wGSY, int wGSZ)
+    {
+        workGroupAmount.x = wGSX;
+        workGroupAmount.y = wGSY;
+        workGroupAmount.z = wGSZ;
+
+        // texture size
+        const unsigned int TEXTURE_WIDTH = wGSX, TEXTURE_HEIGHT = wGSY;
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, workGroupAmount.x, workGroupAmount.y); // Immutable storage
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindImageTexture(0, textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+        // 1. retrieve the vertex/fragment source code from filePath
+        std::string code;
+        std::ifstream shaderFile;
+        // ensure ifstream objects can throw exceptions:
+        shaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+        try 
+        {
+            // open files
+            shaderFile.open(shaderPath);
+            std::stringstream shaderStream;
+            // read file's buffer contents into streams
+            shaderStream << shaderFile.rdbuf();
+            // close file handlers
+            shaderFile.close();
+            // convert stream into string
+            code = shaderStream.str();
+        }
+        catch (std::ifstream::failure& e)
+        {
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
+        }
+
+        const char* shaderCode = code.c_str();
+        
+        // 2. compile shaders
+        unsigned int compute;
+        // vertex shader
+        compute = glCreateShader(GL_COMPUTE_SHADER);
+        glShaderSource(compute, 1, &shaderCode, NULL);
+        glCompileShader(compute);
+        checkCompileErrors(compute, "COMPUTE");
+
+        // shader Program
+        ID = glCreateProgram();
+        glAttachShader(ID, compute);
+        glLinkProgram(ID);
+        checkCompileErrors(ID, "PROGRAM");
+
+        // delete the shaders as they're linked into our program now and no longer necessary
+        glDeleteShader(compute);
+    }
+    // activate the shader
+    // ------------------------------------------------------------------------
+    void use() { 
+        glUseProgram(ID); 
+        // glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    }
+    void dispatch() {
+        glDispatchCompute(workGroupAmount.x, workGroupAmount.y, 1);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
     // utility uniform functions
     // ------------------------------------------------------------------------

@@ -85,7 +85,6 @@ float cubeVertices[216]= {
     -0.5f,  0.5f,  0.5f, 
     -0.5f,  0.5f, -0.5f
 };
-std::vector<glm::vec3> normals(width * height);
 // float vertices[] = {
 //     -0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
 //     0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
@@ -96,6 +95,7 @@ int main()
     glfwInits();
     Shader lightingShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl", "shaders/tessellation.tesc", "shaders/tessellation.tese");
     Shader lightCubeShader("shaders/light_vertex_shader.glsl", "shaders/light_fragment_shader.glsl");
+    ComputeShader computeShader("shaders/compute_shader.comp", chunkSize + 2, chunkSize + 2, 1);
 
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
     // first, configure the cube's VAO (and VBO)
@@ -119,7 +119,7 @@ int main()
     cout << "Maximum nr of vertex attributes supported: " << nrAttributes << endl;
     cout << "Maximum texture size supported: " << max  << endl;
     Light lights[1000];
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
     lightingShader.setInt("width", width);
@@ -147,19 +147,18 @@ int main()
 
     lightingShader.use(); // don't forget to activate/use the shader before setting uniforms!
 
-    float timeTakenToStart = glfwGetTime();
-    // for (int y = 0; y < height / chunkSize; y++) {
-    //     chunks.push_back(vector<Chunk>());
-    //     for (int x = 0; x < width / chunkSize; x++) {
-    //         chunks[y].push_back(Chunk(glm::vec2(x, y)));
-    //         // glBufferData(GL_ARRAY_BUFFER, chunks[y][x].vertices.size() * sizeof(float), chunks[y][x].vertices.data(), GL_STATIC_DRAW);
-    //     }   
-    // }
-    chunks.push_back(vector<Chunk>());
-    chunks[0].push_back(Chunk(glm::vec2(0, 0)));
-    cout << "Time was: " << glfwGetTime() - timeTakenToStart << "\n";
-
-    
+    for (int y = 0; y < height / chunkSize; y++) {
+        chunks.push_back(vector<Chunk>());
+        for (int x = 0; x < width / chunkSize; x++) {
+            chunks[y].push_back(Chunk(glm::vec2(x, y), computeShader, lightingShader));
+        }   
+    }
+    cout << "Use Time: " << useTime << endl;
+    cout << "Set Uniform Time: " << setUniformTime << endl;
+    cout << "Dispatch Time: " << dispatchTime << endl;
+    cout << "Transfer Time: " << transferTime << endl;
+    cout << "Vertices Time: " << verticesTime << endl;
+    cout << "Indices Time: " << indicesTime << endl;
     // 18 fps when looking down at the entire map with half the screen. (I go up until I can barely see the entire map)
     while(!glfwWindowShouldClose(window))   {
         float currentFrame = glfwGetTime();
@@ -206,6 +205,7 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
         // bind height map
+
         // glActiveTexture(GL_TEXTURE2);
         // glBindTexture(GL_TEXTURE_2D, skybox.textureID);
 
@@ -214,8 +214,7 @@ int main()
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100000.0f);
-
+        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 10000000.0f);
 
         lightingShader.use();
         lightingShader.setVec3("viewPos", cameraPos[0], cameraPos[1], cameraPos[2]); 
@@ -240,19 +239,14 @@ int main()
         // draw the object
         
         // cout << "hi";
-        // for (int offsetY = -0; offsetY < 10000; offsetY += chunkSize) {
-        //     for (int offsetX = -0; offsetX < 1000; offsetX += chunkSize) {
-        //         // for (int y = 0; y < 1; y++) {
-        //         //     for (int x = 0; x < 1; x++) {
-                lightingShader.setVec2("offset", 0, 0);
-                glBindVertexArray(chunks[0][0].VAO);
+        for (int y = 0; y < height / chunkSize; y++) {
+            for (int x = 0; x < width / chunkSize; x++) {
+                glBindVertexArray(chunks[y][x].VAO);
                 // This was 69fps
                 // glDrawArrays(GL_TRIANGLES, 0, chunks[y][x].vertices.size() / 9);
-                glDrawElements(GL_PATCHES, chunks[0][0].indices.size(), GL_UNSIGNED_INT, 0);
-        //         //     }   
-        //         // }
-        //     }   
-        // }
+                glDrawElements(GL_PATCHES, chunks[y][x].indices.size(), GL_UNSIGNED_INT, 0);
+            }   
+        }
         // glDrawArraysInstanced(GL_TRIANGLES, 0, 54000000 / 9, 1); 
 
         // also draw the lamp object
