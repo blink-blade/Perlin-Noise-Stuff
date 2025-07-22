@@ -135,6 +135,7 @@ public:
                 }
                 // tR -= 0.001;
                 // tT -= 0.001;
+                // normal = normals[y][x];
                 setVertex(x + pos.x, 0.0, y + pos.y, tL, tB, type);
             }   
         }
